@@ -93,10 +93,9 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
         } else if (c >= Math.PI / 2 && d <= Math.PI / 2 || c <= Math.PI / 2 && d >= Math.PI / 2) {
             console.warn("Constraint failed: c, d < or > 90 deg");
             return;
-        } else if (a + c > Math.PI || b + d > Math.PI) {
-            // console.warn("Constraint failed: angles on each side should be less than 180 deg");
-            // return;
         }
+
+        // TODO: Derive constraint for max open angle when > 180 deg
 
         let shapeDirection = a + c <= Math.PI;
 
