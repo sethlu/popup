@@ -145,6 +145,8 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0
             );
         }
+        // Since we are setting the origin as the origin for the working space, the linePoint may overlap the origin, failing the following computation
+        if (linePoint.lengthSq() < Number.EPSILON) linePoint.add(lineDirection);
 
         // this.debugLine0.geometry.vertices[0].copy(linePoint.clone().add(lineDirection.clone().multiplyScalar(-10)));
         // this.debugLine0.geometry.vertices[1].copy(linePoint.clone().add(lineDirection.clone().multiplyScalar(10)));
