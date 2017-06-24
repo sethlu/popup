@@ -81,11 +81,7 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
             c = this.c,
             d = this.d;
 
-        let shapeForward = new THREE.Vector3(0, 1, 0);
-        let shapeUp = new THREE.Vector3(0, 0, 1);
-        let shapeRight = new THREE.Vector3(1, 0, 0);
-
-        // Angular constraints
+        // Constraints
 
         if (c >= Math.PI / 2 && d <= Math.PI / 2 || c <= Math.PI / 2 && d >= Math.PI / 2) {
             console.warn("Constraint failed: c, d < or > 90 deg");
@@ -103,6 +99,10 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
         // TODO: Derive constraint for max open angle when > 180 deg
 
         // Set up foundational vectors
+
+        let shapeForward = new THREE.Vector3(0, 1, 0);
+        let shapeUp = new THREE.Vector3(0, 0, 1);
+        let shapeRight = new THREE.Vector3(1, 0, 0);
 
         let n1 = shapeUp.clone()
             .applyAxisAngle(shapeRight, d - Math.PI / 2)

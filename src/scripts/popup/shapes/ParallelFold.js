@@ -55,9 +55,7 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
             c = this.c,
             d = this.d;
 
-        let shapeForward = new THREE.Vector3(0, 1, 0);
-        let shapeUp = new THREE.Vector3(0, 0, 1);
-        let shapeRight = new THREE.Vector3(1, 0, 0);
+        // Constraints
 
         if ([a, b, c, d].some(function (x) {return x < 0;})) {
             console.warn("Constraint failed: a, b, c, d >= 0");
@@ -70,6 +68,14 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
             return;
         }
 
+        // Set up foundational vectors
+
+        let shapeForward = new THREE.Vector3(0, 1, 0);
+        let shapeUp = new THREE.Vector3(0, 0, 1);
+        let shapeRight = new THREE.Vector3(1, 0, 0);
+
+        // Find parallel-fold position
+
         let p1 = shapeUp.clone().applyAxisAngle(shapeForward, angle / 2).multiplyScalar(b);
         let p2 = shapeUp.clone().applyAxisAngle(shapeForward, - angle / 2).multiplyScalar(a);
         let p2p1 = p2.clone().multiplyScalar(-1).add(p1);
@@ -80,6 +86,8 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
         let p3p1 = p1p3.clone().negate();
         let p2p3 = p2.clone().multiplyScalar(-1).add(p3);
         let p3p2 = p2p3.clone().negate();
+
+        // Gullies
 
         let gullyDirection = shapeForward;
 
