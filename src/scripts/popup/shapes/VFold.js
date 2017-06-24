@@ -87,17 +87,20 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         // Angular constraints
 
-        if (Math.abs(a + c - b - d) >= EPSILON) {
-            console.warn("Constraint failed: a + c = b + d; angles on the left = angles on the right");
-            return;
-        } else if (c >= Math.PI / 2 && d <= Math.PI / 2 || c <= Math.PI / 2 && d >= Math.PI / 2) {
+        if (c >= Math.PI / 2 && d <= Math.PI / 2 || c <= Math.PI / 2 && d >= Math.PI / 2) {
             console.warn("Constraint failed: c, d < or > 90 deg");
             return;
         }
 
-        // TODO: Derive constraint for max open angle when > 180 deg
-
         let shapeDirection = a + c <= Math.PI;
+
+        if (shapeDirection && Math.abs(a + c - b - d) >= EPSILON
+            || !shapeDirection && Math.abs(a + (Math.PI - c) - b - (Math.PI - d)) >= EPSILON) {
+            console.warn("Constraint failed: a + c = b + d; angles on the left = angles on the right");
+            return;
+        }
+
+        // TODO: Derive constraint for max open angle when > 180 deg
 
         // Set up foundational vectors
 
