@@ -5,6 +5,9 @@ import {Shape} from "./Shape.js";
 import {Gully} from "../Gully.js";
 import {ParallelFold} from "./ParallelFold.js";
 import {VFold} from "./VFold.js";
+import {ShapeControl} from "../ShapeControl.js";
+
+let transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
 function Fold(origin, a, b, c, d, e) {
 
@@ -28,6 +31,71 @@ function Fold(origin, a, b, c, d, e) {
         new Gully()
     ];
     this.add.apply(this, this.gullies);
+
+    // Controls
+
+    this.shapeControls = [
+
+        // 0
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (intersection) {
+                this.origin = intersection.point.y;
+            }.bind(this),
+            "gully"
+        ),
+
+        // 1
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (intersection) {
+                let x = intersection.point.x;
+                let z = intersection.point.z;
+
+                this.a = Math.sqrt(x * x + z * z);
+            }.bind(this)
+        ),
+
+        // 2
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (intersection) {
+                let x = intersection.point.x;
+                let z = intersection.point.z;
+
+                this.b = Math.sqrt(x * x + z * z);
+            }.bind(this)
+        ),
+
+        // 3 & 5
+        new ShapeControl(
+            [
+                function () {
+                    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial);
+                    mesh.rotateY(Math.PI / 2);
+                    return mesh;
+                }()
+            ],
+            function (intersection) {
+                let x = intersection.point.x,
+                    y = intersection.point.y,
+                    z = intersection.point.z;
+
+                this.c = Math.sqrt(x * x + z * z);
+                this.e = y - scope.d;
+            }.bind(this)
+        ),
+
+        // 4
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (intersection) {
+                this.d = intersection.point.y;
+            }.bind(this)
+        )
+
+    ];
+    this.add.apply(this, this.shapeControls);
 
 }
 
@@ -57,6 +125,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         // Set up foundational vectors
 
         let shapeForward = new THREE.Vector3(0, 1, 0);
+        let shapeUp = new THREE.Vector3(0, 0, 1);
 
         let p1 = new THREE.Vector3(b);
         let p2 = new THREE.Vector3(- a);
@@ -75,7 +144,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let x = solveWithNewtonRaphsonMethod(function (x) {
                 let y = Math.sqrt(c * c - x * x);
-                let p3 = new THREE.Vector3(x, e, y);
+                let p3 = new THREE.Vector3(x, d + e, y);
                 let v3 = o.clone().multiplyScalar(-1).add(p3);
 
                 let va = v2.angleTo(v3);
@@ -84,9 +153,9 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 if (shapeDirection) return va + vc - vb - vd;
                 return va + (Math.PI - vc) - vb - (Math.PI - vd);
             });
-
             let y = Math.sqrt(c * c - x * x);
-            let p3 = new THREE.Vector3(x, e, y);
+
+            let p3 = new THREE.Vector3(x, d + e, y);
             let v3 = o.clone().multiplyScalar(-1).add(p3);//.multiplyScalar(-d / (e - d));
 
             va = v2.angleTo(v3);
@@ -122,8 +191,9 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                     )
                     - 4 * a * a * b + 4 * a * b * b
                 ) / (2 * (a * a + 2 * a * b + b * b));
+            let y = Math.sqrt(c * c - x * x);
 
-            let p3 = new THREE.Vector3(x, 0, Math.sqrt(c * c - x * x));
+            let p3 = new THREE.Vector3(x, 0, y);
 
             let fold = new ParallelFold(0, a, b, p2.distanceTo(p3), p1.distanceTo(p3));
             fold.interpolate(angle);
@@ -137,6 +207,81 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             }, this);
 
+        }
+
+        // Shape controls
+
+        let c1 = shapeUp.clone()
+            .applyAxisAngle(shapeForward, angle / 2)
+            .multiplyScalar(b);
+        let c3 = shapeUp.clone().multiplyScalar(c)
+            .add(shapeForward.clone().multiplyScalar(d + e));
+        let c2 = shapeUp.clone()
+            .applyAxisAngle(shapeForward, - angle / 2)
+            .multiplyScalar(a);
+
+        // 1
+        {
+            let shapeControl = this.shapeControls[1];
+
+            let position = c2;
+            let positionNormalized = position.clone().normalize();
+
+            shapeControl.position.copy(position);
+
+            let rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.elements = [
+                - positionNormalized.x, 0, - positionNormalized.z, 0,
+                0, 1, 0, 0,
+                positionNormalized.z, 0, - positionNormalized.x, 0,
+                0, 0, 0, 1
+            ];
+            shapeControl.setRotationFromMatrix(rotationMatrix);
+        }
+
+        // 2
+        {
+            let shapeControl = this.shapeControls[2];
+
+            let position = c1;
+            let positionNormalized = position.clone().normalize();
+
+            shapeControl.position.copy(position);
+
+            let rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.elements = [
+                positionNormalized.x, 0, positionNormalized.z, 0,
+                0, 1, 0, 0,
+                - positionNormalized.z, 0, positionNormalized.x, 0,
+                0, 0, 0, 1
+            ];
+            shapeControl.setRotationFromMatrix(rotationMatrix);
+        }
+
+        // 3 & 5
+        {
+            let shapeControl = this.shapeControls[3];
+
+            let position = c3;
+            let positionNormalized = position.clone().normalize();
+
+            shapeControl.position.copy(position);
+
+            let rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.elements = [
+                1, 0, 0, 0,
+                0, 0, 1, 0,
+                0, -1, 0, 0,
+                0, 0, 0, 1
+            ];
+            shapeControl.setRotationFromMatrix(rotationMatrix);
+        }
+
+        // 4
+        {
+            let shapeControl = this.shapeControls[4];
+
+            shapeControl.position.setY(d);
         }
 
     }

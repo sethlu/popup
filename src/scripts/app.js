@@ -3,71 +3,42 @@ import * as THREE from "three";
 import * as DAT from "dat.gui/build/dat.gui.min.js";
 import OrbitControls from "three-orbitcontrols";
 import Stats from "stats.js";
-import {Base, VFold, ParallelFold} from "./popup/popup.js"
+import {Base, Fold, VFold, ParallelFold, ShapeControls} from "./popup/popup.js"
 
 // Model
 
 let base = new Base();
 
-let vFold = new VFold(
+let fold = new Fold(
     0,
-    Math.PI * 85 / 180,
-    Math.PI * 60 / 180,
-    Math.PI * 50 / 180,
-    Math.PI * 75 / 180
+    1,
+    2,
+    2,
+    -2,
+    0
 );
-base.gullies[0].shapes.push(vFold);
-base.gullies[0].add(vFold);
+base.gullies[0].shapes.push(fold);
+base.gullies[0].add(fold);
 
-    let vFold3 = new VFold(
+    let vFold = new VFold(
         0.5,
         Math.PI * 40 / 180,
         Math.PI * 40 / 180,
         Math.PI * 40 / 180,
         Math.PI * 40 / 180
     );
-    vFold.gullies[0].shapes.push(vFold3);
-    vFold.gullies[0].add(vFold3);
+    fold.gullies[0].shapes.push(vFold);
+    fold.gullies[0].add(vFold);
 
-    let parallelFold2 = new ParallelFold(
+    let parallelFold = new ParallelFold(
         0,
         1.5,
         1,
         1.5,
         2
     );
-    vFold.gullies[4].shapes.push(parallelFold2);
-    vFold.gullies[4].add(parallelFold2);
-
-        let vFold4 = new VFold(
-            0.5,
-            Math.PI * 40 / 180,
-            Math.PI * 40 / 180,
-            Math.PI * 40 / 180,
-            Math.PI * 40 / 180
-        );
-        parallelFold2.gullies[3].shapes.push(vFold4);
-        parallelFold2.gullies[3].add(vFold4);
-
-        let vFold5 = new VFold(
-            0.5,
-            Math.PI * 60 / 180,
-            Math.PI * 60 / 180,
-            Math.PI * 40 / 180,
-            Math.PI * 40 / 180
-        );
-        parallelFold2.gullies[2].shapes.push(vFold5);
-        parallelFold2.gullies[2].add(vFold5);
-
-let vFold2 = new VFold(
-    1.5,
-    Math.PI * 90 / 180,
-    Math.PI * 90 / 180,
-    Math.PI * 120 / 180,
-    Math.PI * 120 / 180
-);
-base.gullies[0].shapes.push(vFold2);
-base.gullies[0].add(vFold2);
+    fold.gullies[4].shapes.push(parallelFold);
+    fold.gullies[4].add(parallelFold);
 
 // Render
 
@@ -89,9 +60,9 @@ window.addEventListener("load", function () {
     camera.up.set(0, 0, 1);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
-    // Controls
-    let controls = new OrbitControls(camera, renderer.domElement);
-    controls.maxPolarAngle = Math.PI * 89 / 180;
+    // Orbit controls
+    let orbitControls = new OrbitControls(camera, renderer.domElement);
+    orbitControls.maxPolarAngle = Math.PI * 89 / 180;
 
     // Scene
 
@@ -125,17 +96,16 @@ window.addEventListener("load", function () {
 
     // Interactions
 
-    // let raycaster = new THREE.Raycaster();
-    // raycaster.linePrecision = 1;
-    //
-    // let mouse = new THREE.Vector2(NaN, NaN);
-    //
-    // renderer.domElement.addEventListener("mousemove", function (event) {
-    //
-    //     mouse.x = (event.clientX / renderer.domElement.offsetWidth) * 2 - 1;
-    //     mouse.y = - (event.clientY / renderer.domElement.offsetHeight) * 2 + 1
-    //
-    // });
+    let shapeControls = new ShapeControls(camera, renderer.domElement);
+    shapeControls.activeShape = fold;
+
+    shapeControls.addEventListener("start", function () {
+       orbitControls.enabled = false;
+    });
+
+    shapeControls.addEventListener("end", function () {
+        orbitControls.enabled = true;
+    });
 
     // Render Loop
 
@@ -145,21 +115,8 @@ window.addEventListener("load", function () {
 
         // Angle
 
-        if (vars.angle !== vars._angle) {
-            base.interpolate(vars.angle * Math.PI / 180);
-        }
+        base.interpolate(vars.angle * Math.PI / 180);
         vars._angle = vars.angle;
-
-        // Interactions
-
-        // if (mouse.x && mouse.y) {
-        //
-        //     raycaster.setFromCamera(mouse, camera);
-        //     let intersects = raycaster.intersectObjects([
-        //         base.gullies[0].debugLine0
-        //     ]);
-        //
-        // }
 
         // Render
 
