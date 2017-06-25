@@ -84,7 +84,7 @@ function Fold(origin, a, b, c, d, e) {
                     z = intersection.point.z;
 
                 this.c = Math.sqrt(x * x + z * z);
-                this.e = y - scope.d;
+                this.e = y - this.d;
             }.bind(this)
         ),
 
