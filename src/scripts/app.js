@@ -74,7 +74,7 @@ window.addEventListener("load", function () {
     // Ambient light
     scene.add(new THREE.AmbientLight(0xcccccc));
 
-    // Spot Light
+    // Spot light
     let spotLight = new THREE.SpotLight(0xffffff, 1, 50, Math.PI / 4);
     spotLight.position.set(-1, -1, 20);
     spotLight.target.position.set(0, 0, 0);
@@ -107,7 +107,7 @@ window.addEventListener("load", function () {
         orbitControls.enabled = true;
     });
 
-    // Render Loop
+    // Render loop
 
     (function render() {
 
