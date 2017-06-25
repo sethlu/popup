@@ -9,6 +9,8 @@ import {ShapeControl} from "../ShapeControl.js";
 
 let transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
+// TODO: Warn suitable gullies to place additional shapes
+
 function Fold(origin, a, b, c, d, e) {
 
     Shape.call(this);
