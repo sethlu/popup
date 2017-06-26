@@ -15,7 +15,7 @@ function ShapeControl(ranges, func, referenceSpace = "shape") {
 
     // Control ranges
 
-    this.ranges = [];
+    this.ranges = ranges.slice();
     this.add.apply(this, ranges);
 
     // Control func
@@ -24,17 +24,7 @@ function ShapeControl(ranges, func, referenceSpace = "shape") {
 
 }
 
-ShapeControl.prototype = Object.assign(Object.create(THREE.Mesh.prototype), {
-
-    add: function (object) {
-
-        THREE.Mesh.prototype.add.apply(this, arguments);
-
-        if (object instanceof THREE.Object3D) {
-            this.ranges.push(object);
-        }
-
-    }
+ShapeControl.prototype = Object.assign(Object.create(THREE.Group.prototype), {
 
 });
 
