@@ -1,17 +1,37 @@
 
 import * as THREE from "three";
 
-let shapeControlMaterial = new THREE.MeshBasicMaterial({color: 0xffd800, shading: THREE.SmoothShading});
+let textureLoader = new THREE.TextureLoader();
 
-function ShapeControl(ranges, func, referenceSpace = "shape") {
+let blankTexture = textureLoader.load("images/shapecontrol_blank.png");
+let arrowTexture = textureLoader.load("images/shapecontrol_line_arrows.png");
 
-    THREE.Mesh.call(
-        this,
-        new THREE.SphereGeometry(0.1),
-        shapeControlMaterial
-    );
+let handleMaterial = new THREE.SpriteMaterial({map: blankTexture, transparent: true, opacity: 0.8});
+handleMaterial.depthWrite = false;
+handleMaterial.depthTest = false;
+
+function ShapeControl(ranges, func, referenceSpace = "shape", movement = 1) {
+
+    THREE.Group.call(this);
 
     this.referenceSpace = referenceSpace;
+    this.movement = movement;
+
+    // Control handle
+
+    this.arrows = [];
+    for (let i = 0; i < movement; ++i) {
+        let arrowMaterial = new THREE.SpriteMaterial({map: arrowTexture});
+        arrowMaterial.depthWrite = false;
+        arrowMaterial.depthTest = false;
+        let arrow = new THREE.Sprite(arrowMaterial);
+
+        this.arrows.push(arrow);
+        this.add(arrow);
+    }
+
+    this.handle = new THREE.Sprite(handleMaterial);
+    this.add(this.handle);
 
     // Control ranges
 

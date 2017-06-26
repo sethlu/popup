@@ -118,6 +118,10 @@ window.addEventListener("load", function () {
         base.interpolate(vars.angle * Math.PI / 180);
         vars._angle = vars.angle;
 
+        // Interactions
+
+        shapeControls.update();
+
         // Render
 
         renderer.render(scene, camera);

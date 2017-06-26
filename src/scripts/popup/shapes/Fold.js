@@ -51,8 +51,8 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                let x = intersection.point.x;
-                let z = intersection.point.z;
+                let x = intersection.point.x,
+                    z = intersection.point.z;
 
                 this.a = Math.sqrt(x * x + z * z);
             }.bind(this)
@@ -62,8 +62,8 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                let x = intersection.point.x;
-                let z = intersection.point.z;
+                let x = intersection.point.x,
+                    z = intersection.point.z;
 
                 this.b = Math.sqrt(x * x + z * z);
             }.bind(this)
@@ -71,21 +71,17 @@ function Fold(origin, a, b, c, d, e) {
 
         // 3 & 5
         new ShapeControl(
-            [
-                function () {
-                    let mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial);
-                    mesh.rotateY(Math.PI / 2);
-                    return mesh;
-                }()
-            ],
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
                 let x = intersection.point.x,
                     y = intersection.point.y,
                     z = intersection.point.z;
 
                 this.c = Math.sqrt(x * x + z * z);
-                this.e = y - this.d;
-            }.bind(this)
+                this.e = y;
+            }.bind(this),
+            undefined,
+            2
         ),
 
         // 4
@@ -98,6 +94,10 @@ function Fold(origin, a, b, c, d, e) {
 
     ];
     this.add.apply(this, this.shapeControls);
+
+    // Debug
+
+    this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
 
 }
 
@@ -146,7 +146,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let x = solveWithNewtonRaphsonMethod(function (x) {
                 let y = Math.sqrt(c * c - x * x);
-                let p3 = new THREE.Vector3(x, d + e, y);
+                let p3 = new THREE.Vector3(x, e, y);
                 let v3 = o.clone().multiplyScalar(-1).add(p3);
 
                 let va = v2.angleTo(v3);
@@ -157,7 +157,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             });
             let y = Math.sqrt(c * c - x * x);
 
-            let p3 = new THREE.Vector3(x, d + e, y);
+            let p3 = new THREE.Vector3(x, e, y);
             let v3 = o.clone().multiplyScalar(-1).add(p3);//.multiplyScalar(-d / (e - d));
 
             va = v2.angleTo(v3);
@@ -217,7 +217,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             .applyAxisAngle(shapeForward, angle / 2)
             .multiplyScalar(b);
         let c3 = shapeUp.clone().multiplyScalar(c)
-            .add(shapeForward.clone().multiplyScalar(d + e));
+            .add(shapeForward.clone().multiplyScalar(e));
         let c2 = shapeUp.clone()
             .applyAxisAngle(shapeForward, - angle / 2)
             .multiplyScalar(a);
@@ -233,8 +233,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
-                - positionNormalized.x, 0, - positionNormalized.z, 0,
                 0, 1, 0, 0,
+                positionNormalized.x, 0, positionNormalized.z, 0,
                 positionNormalized.z, 0, - positionNormalized.x, 0,
                 0, 0, 0, 1
             ];
@@ -252,8 +252,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
+                0, -1, 0, 0,
                 positionNormalized.x, 0, positionNormalized.z, 0,
-                0, 1, 0, 0,
                 - positionNormalized.z, 0, positionNormalized.x, 0,
                 0, 0, 0, 1
             ];
@@ -271,9 +271,9 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
-                1, 0, 0, 0,
+                0, 1, 0, 0,
                 0, 0, 1, 0,
-                0, -1, 0, 0,
+                1, 0, 0, 0,
                 0, 0, 0, 1
             ];
             shapeControl.setRotationFromMatrix(rotationMatrix);
