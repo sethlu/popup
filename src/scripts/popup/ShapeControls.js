@@ -118,33 +118,65 @@ function ShapeControls(camera, domElement) {
 ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prototype), {
 
     update: function () {
-        let camera = this.camera;
 
-        camera.updateMatrixWorld();
+        let properties = {};
 
-        let factor = 32 / this.domElement.offsetHeight;
+        function isUpdated(object) {
+            if (!properties[object.id]) properties[object.id] = {
+                worldPosition: new THREE.Vector3(),
+                worldQuaternion: new THREE.Quaternion()
+            };
+            let prop = properties[object.id];
 
-        if (this.activeShape) this.activeShape.shapeControls.forEach(function (shapeControl) {
-            let scale = shapeControl.getWorldPosition().distanceTo(camera.position) * factor;
-            shapeControl.handle.scale.set(scale, scale, scale);
+            let worldPosition = object.getWorldPosition(),
+                worldQuaternion = object.getWorldQuaternion();
 
-            let o = shapeControl.localToWorld(new THREE.Vector3(0, 0, 0)).project(camera);
-            let v = shapeControl.localToWorld(new THREE.Vector3(0, 1, 0)).project(camera);
-            let rotv = new THREE.Vector2((v.x - o.x) * camera.aspect, v.y - o.y).angle() - Math.PI / 2;
+            let updated = false;
 
-            shapeControl.arrows[0].scale.set(scale, scale, scale);
-            shapeControl.arrows[0].material.rotation = rotv;
-
-            if (shapeControl.movement === 2) {
-                let u = shapeControl.localToWorld(new THREE.Vector3(1, 0, 0)).project(camera);
-                let rotu = new THREE.Vector2((u.x - o.x) * camera.aspect, u.y - o.y).angle() - Math.PI / 2;
-
-                shapeControl.arrows[1].scale.set(scale, scale, scale);
-                shapeControl.arrows[1].material.rotation = rotu;
+            if (!prop.worldPosition.equals(worldPosition)) {
+                prop.worldPosition.copy(worldPosition);
+                updated = true;
             }
 
-        });
-    }
+            if (!prop.worldQuaternion.equals(worldQuaternion)) {
+                prop.worldQuaternion.copy(worldQuaternion);
+                updated = true;
+            }
+
+            return updated;
+        }
+
+        return function () {
+            let camera = this.camera;
+            let cameraNotUpdated = !isUpdated(camera);
+
+            let factor = 32 / this.domElement.offsetHeight;
+
+            if (this.activeShape) this.activeShape.shapeControls.forEach(function (shapeControl) {
+                if (cameraNotUpdated && !isUpdated(shapeControl)) return;
+
+                let scale = shapeControl.getWorldPosition().distanceTo(camera.position) * factor;
+                shapeControl.handle.scale.set(scale, scale, scale);
+
+                let o = shapeControl.localToWorld(new THREE.Vector3(0, 0, 0)).project(camera);
+                let v = shapeControl.localToWorld(new THREE.Vector3(0, 1, 0)).project(camera);
+                let rotv = new THREE.Vector2((v.x - o.x) * camera.aspect, v.y - o.y).angle() - Math.PI / 2;
+
+                shapeControl.arrows[0].scale.set(scale, scale, scale);
+                shapeControl.arrows[0].material.rotation = rotv;
+
+                if (shapeControl.movement === 2) {
+                    let u = shapeControl.localToWorld(new THREE.Vector3(1, 0, 0)).project(camera);
+                    let rotu = new THREE.Vector2((u.x - o.x) * camera.aspect, u.y - o.y).angle() - Math.PI / 2;
+
+                    shapeControl.arrows[1].scale.set(scale, scale, scale);
+                    shapeControl.arrows[1].material.rotation = rotu;
+                }
+
+            });
+        };
+
+    }()
 
 });
 
