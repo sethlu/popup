@@ -151,6 +151,8 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
             let cameraNotUpdated = !isUpdated(camera);
 
             let factor = 32 / this.domElement.offsetHeight;
+            let worldProjectionMatrix = new THREE.Matrix4();
+            worldProjectionMatrix.multiplyMatrices(camera.projectionMatrix, worldProjectionMatrix.getInverse(camera.matrixWorld));
 
             if (this.activeShape) this.activeShape.shapeControls.forEach(function (shapeControl) {
                 if (cameraNotUpdated && !isUpdated(shapeControl)) return;
@@ -158,15 +160,15 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
                 let scale = shapeControl.getWorldPosition().distanceTo(camera.position) * factor;
                 shapeControl.handle.scale.set(scale, scale, scale);
 
-                let o = shapeControl.localToWorld(new THREE.Vector3(0, 0, 0)).project(camera);
-                let v = shapeControl.localToWorld(new THREE.Vector3(0, 1, 0)).project(camera);
+                let o = shapeControl.localToWorld(new THREE.Vector3(0, 0, 0)).applyMatrix4(worldProjectionMatrix);
+                let v = shapeControl.localToWorld(new THREE.Vector3(0, 1, 0)).applyMatrix4(worldProjectionMatrix);
                 let rotv = new THREE.Vector2((v.x - o.x) * camera.aspect, v.y - o.y).angle() - Math.PI / 2;
 
                 shapeControl.arrows[0].scale.set(scale, scale, scale);
                 shapeControl.arrows[0].material.rotation = rotv;
 
                 if (shapeControl.movement === 2) {
-                    let u = shapeControl.localToWorld(new THREE.Vector3(1, 0, 0)).project(camera);
+                    let u = shapeControl.localToWorld(new THREE.Vector3(1, 0, 0)).applyMatrix4(worldProjectionMatrix);
                     let rotu = new THREE.Vector2((u.x - o.x) * camera.aspect, u.y - o.y).angle() - Math.PI / 2;
 
                     shapeControl.arrows[1].scale.set(scale, scale, scale);
