@@ -1,7 +1,7 @@
 
 import * as THREE from "three";
 
-function ShapeControls(camera, domElement, referenceSpace) {
+function ShapeControls(camera, domElement) {
 
     this.camera = camera;
     this.domElement = domElement;
