@@ -56,7 +56,7 @@ window.addEventListener("load", function () {
     // Camera
 
     let camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000);
-    camera.position.set(5, -20, 20);
+    camera.position.set(2, -15, 15);
     camera.up.set(0, 0, 1);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
