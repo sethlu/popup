@@ -3,14 +3,13 @@ import * as THREE from "three";
 
 let textureLoader = new THREE.TextureLoader();
 
-let blankTexture = textureLoader.load("images/shapecontrol_blank.png");
+let backgroundTexture = textureLoader.load("images/shapecontrol_blank.png");
 let arrowTexture = textureLoader.load("images/shapecontrol_line_arrows.png");
 
-let handleMaterial = new THREE.SpriteMaterial({map: blankTexture, transparent: true, opacity: 0.8});
-handleMaterial.depthWrite = false;
-handleMaterial.depthTest = false;
+const BACKGROUND_OPACITY = 0.8;
+const ARROW_OPACITY = 1;
 
-function ShapeControl(ranges, func, referenceSpace = "shape", movement = 1) {
+function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 1) {
 
     THREE.Group.call(this);
 
@@ -19,19 +18,29 @@ function ShapeControl(ranges, func, referenceSpace = "shape", movement = 1) {
 
     // Control handle
 
-    this.arrows = [];
+    let handle = new THREE.Group();
+
+    handle.arrows = [];
     for (let i = 0; i < movement; ++i) {
-        let arrowMaterial = new THREE.SpriteMaterial({map: arrowTexture});
+        let arrowMaterial = new THREE.SpriteMaterial({map: arrowTexture, transparent: true, opacity: ARROW_OPACITY});
         arrowMaterial.depthWrite = false;
         arrowMaterial.depthTest = false;
-        let arrow = new THREE.Sprite(arrowMaterial);
 
-        this.arrows.push(arrow);
-        this.add(arrow);
+        let arrow = new THREE.Sprite(arrowMaterial);
+        handle.arrows.push(arrow);
+        handle.add(arrow);
     }
 
-    this.handle = new THREE.Sprite(handleMaterial);
-    this.add(this.handle);
+    let handleMaterial = new THREE.SpriteMaterial({map: backgroundTexture, transparent: true, opacity: BACKGROUND_OPACITY});
+    handleMaterial.depthWrite = false;
+    handleMaterial.depthTest = false;
+
+    let background = new THREE.Sprite(handleMaterial);
+    handle.background = background;
+    handle.add(background);
+
+    this.handle = handle;
+    this.add(handle);
 
     // Control ranges
 
@@ -48,4 +57,4 @@ ShapeControl.prototype = Object.assign(Object.create(THREE.Group.prototype), {
 
 });
 
-export {ShapeControl};
+export {ShapeControl, BACKGROUND_OPACITY, ARROW_OPACITY};

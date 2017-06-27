@@ -51,10 +51,7 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                let x = intersection.point.x,
-                    z = intersection.point.z;
-
-                this.a = Math.sqrt(x * x + z * z);
+                this.a = intersection.point.y;
             }.bind(this)
         ),
 
@@ -62,10 +59,7 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                let x = intersection.point.x,
-                    z = intersection.point.z;
-
-                this.b = Math.sqrt(x * x + z * z);
+                this.b = intersection.point.y;
             }.bind(this)
         ),
 
@@ -73,12 +67,8 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                let x = intersection.point.x,
-                    y = intersection.point.y,
-                    z = intersection.point.z;
-
-                this.c = Math.sqrt(x * x + z * z);
-                this.e = y;
+                this.c = intersection.point.y;
+                this.e = intersection.point.x;
             }.bind(this),
             undefined,
             2
@@ -229,7 +219,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let position = c2;
             let positionNormalized = position.clone().normalize();
 
-            shapeControl.position.copy(position);
+            shapeControl.handle.position.set(0, a, 0);
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
@@ -248,7 +238,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let position = c1;
             let positionNormalized = position.clone().normalize();
 
-            shapeControl.position.copy(position);
+            shapeControl.handle.position.set(0, b, 0);
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
@@ -267,7 +257,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let position = c3;
             let positionNormalized = position.clone().normalize();
 
-            shapeControl.position.copy(position);
+            shapeControl.handle.position.set(e, c, 0);
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
@@ -283,7 +273,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         {
             let shapeControl = this.shapeControls[4];
 
-            shapeControl.position.setY(d);
+            shapeControl.handle.position.set(0, d, 0);
         }
 
     }

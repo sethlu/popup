@@ -24,6 +24,7 @@
     "stats.js": "^0.17.0",
     "three": "^0.85.2",
     "three-orbitcontrols": "^1.2.0",
+    "tween.js": "^16.6.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   }

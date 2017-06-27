@@ -1,5 +1,7 @@
 
 import * as THREE from "three";
+import TWEEN from "tween.js";
+import {BACKGROUND_OPACITY, ARROW_OPACITY} from "./ShapeControl.js";
 
 function ShapeControls(camera, domElement) {
 
@@ -42,13 +44,27 @@ function ShapeControls(camera, domElement) {
 
         rayCaster.setFromCamera(start, scope.camera);
         let intersects = rayCaster.intersectObjects(scope.activeShape.shapeControls.map(function (shapeControl) {
-            return shapeControl.handle;
+            return shapeControl.handle.background;
         }));
 
         if (intersects.length === 0) return;
         let intersect = intersects[0];
 
-        activeShapeControl = intersect.object.parent;
+        activeShapeControl = intersect.object.parent.parent;
+
+        scope.activeShape.shapeControls.map(function (shapeControl) {
+            let handle = shapeControl.handle;
+
+            new TWEEN.Tween(handle.background.material).to({
+                opacity: shapeControl === activeShapeControl ? BACKGROUND_OPACITY : 0
+            }, 100).start();
+
+            for (let arrow of handle.arrows) {
+                new TWEEN.Tween(arrow.material).to({
+                    opacity: shapeControl === activeShapeControl ? ARROW_OPACITY : 0
+                }, 100).start();
+            }
+        });
 
         // Event listeners
 
@@ -104,10 +120,30 @@ function ShapeControls(camera, domElement) {
 
         if (scope.enabled === false) return;
 
+        // Event listeners
+
         scope.domElement.removeEventListener("mousemove", onMouseMove);
         scope.domElement.removeEventListener("mouseup", onMouseUp);
 
         scope.dispatchEvent(endEvent);
+
+        // Internals
+
+        scope.activeShape.shapeControls.map(function (shapeControl) {
+            let handle = shapeControl.handle;
+
+            new TWEEN.Tween(handle.background.material).to({
+                opacity: BACKGROUND_OPACITY
+            }, 100).start();
+
+            for (let arrow of handle.arrows) {
+                new TWEEN.Tween(arrow.material).to({
+                    opacity: ARROW_OPACITY
+                }, 100).start();
+            }
+        });
+
+        activeShapeControl = null;
 
     }
 
@@ -155,24 +191,24 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
             worldProjectionMatrix.multiplyMatrices(camera.projectionMatrix, worldProjectionMatrix.getInverse(camera.matrixWorld));
 
             if (this.activeShape) this.activeShape.shapeControls.forEach(function (shapeControl) {
-                if (cameraNotUpdated && !isUpdated(shapeControl)) return;
+                let handle = shapeControl.handle;
 
-                let scale = shapeControl.getWorldPosition().distanceTo(camera.position) * factor;
-                shapeControl.handle.scale.set(scale, scale, scale);
+                if (cameraNotUpdated && !isUpdated(handle)) return;
 
-                let o = shapeControl.localToWorld(new THREE.Vector3(0, 0, 0)).applyMatrix4(worldProjectionMatrix);
-                let v = shapeControl.localToWorld(new THREE.Vector3(0, 1, 0)).applyMatrix4(worldProjectionMatrix);
+                let scale = handle.getWorldPosition().distanceTo(camera.position) * factor;
+                handle.scale.set(scale, scale, scale);
+
+                let o = handle.localToWorld(new THREE.Vector3(0, 0, 0)).applyMatrix4(worldProjectionMatrix);
+                let v = handle.localToWorld(new THREE.Vector3(0, 1, 0)).applyMatrix4(worldProjectionMatrix);
                 let rotv = new THREE.Vector2((v.x - o.x) * camera.aspect, v.y - o.y).angle() - Math.PI / 2;
 
-                shapeControl.arrows[0].scale.set(scale, scale, scale);
-                shapeControl.arrows[0].material.rotation = rotv;
+                handle.arrows[0].material.rotation = rotv;
 
                 if (shapeControl.movement === 2) {
-                    let u = shapeControl.localToWorld(new THREE.Vector3(1, 0, 0)).applyMatrix4(worldProjectionMatrix);
+                    let u = handle.localToWorld(new THREE.Vector3(1, 0, 0)).applyMatrix4(worldProjectionMatrix);
                     let rotu = new THREE.Vector2((u.x - o.x) * camera.aspect, u.y - o.y).angle() - Math.PI / 2;
 
-                    shapeControl.arrows[1].scale.set(scale, scale, scale);
-                    shapeControl.arrows[1].material.rotation = rotu;
+                    handle.arrows[1].material.rotation = rotu;
                 }
 
             });

@@ -3,6 +3,7 @@ import * as THREE from "three";
 import * as DAT from "dat.gui/build/dat.gui.min.js";
 import OrbitControls from "three-orbitcontrols";
 import Stats from "stats.js";
+import TWEEN from "tween.js";
 import {Base, Fold, VFold, ParallelFold, ShapeControls} from "./popup/popup.js"
 
 // Model
@@ -109,7 +110,7 @@ window.addEventListener("load", function () {
 
     // Render loop
 
-    (function render() {
+    (function render(time) {
 
         stats.begin();
 
@@ -123,6 +124,10 @@ window.addEventListener("load", function () {
         shapeControls.update();
 
         // Render
+
+        if (time) {
+            TWEEN.update(time);
+        }
 
         renderer.render(scene, camera);
 
