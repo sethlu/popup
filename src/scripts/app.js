@@ -47,9 +47,9 @@ window.addEventListener("load", function () {
     // Renderer
 
     let renderer = new THREE.WebGLRenderer();
-    renderer.antialias = true;
+    // renderer.antialias = true;
     renderer.setClearColor(0x888888);
-    // renderer.setPixelRatio(window.devicePixelRatio || 1);
+    renderer.setPixelRatio(window.devicePixelRatio || 1);
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
