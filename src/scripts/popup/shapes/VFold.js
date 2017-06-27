@@ -88,7 +88,7 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
             return;
         }
 
-        let shapeDirection = a + c <= Math.PI;
+        let shapeDirection = c <= Math.PI / 2;
 
         if (shapeDirection && Math.abs(a + c - b - d) >= EPSILON
             || !shapeDirection && Math.abs(a + (Math.PI - c) - b - (Math.PI - d)) >= EPSILON) {
