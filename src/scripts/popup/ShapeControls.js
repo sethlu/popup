@@ -182,7 +182,7 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
             return updated;
         }
 
-        return function () {
+        return function (force = false) {
             let camera = this.camera;
             let cameraNotUpdated = !isUpdated(camera);
 
@@ -193,7 +193,7 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
             if (this.activeShape) this.activeShape.shapeControls.forEach(function (shapeControl) {
                 let handle = shapeControl.handle;
 
-                if (cameraNotUpdated && !isUpdated(handle)) return;
+                if (cameraNotUpdated && !isUpdated(handle) && !force) return;
 
                 let scale = handle.getWorldPosition().distanceTo(camera.position) * factor;
                 handle.scale.set(scale, scale, scale);
