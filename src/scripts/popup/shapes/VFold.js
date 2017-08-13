@@ -37,7 +37,7 @@ function VFold(origin, a, b, c, d) {
     ];
     this.add.apply(this, this.gullies);
 
-    this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
+    // this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
 
     // Debug
 

@@ -101,7 +101,7 @@ function Fold(origin, a, b, c, d, e, f) {
 
     // Debug
 
-    this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
+    // this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
 
     this.debugMesh0 = new THREE.Mesh(new THREE.Geometry(), debugMeshMaterial);
     this.debugMesh0.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
@@ -186,6 +186,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0, 0, 0, 1
             ];
             shapeControl.setRotationFromMatrix(rotationMatrix);
+
+            shapeControl.updateGrid();
         }
 
         // c & d
@@ -202,6 +204,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0, 0, 0, 1
             ];
             shapeControl.setRotationFromMatrix(rotationMatrix);
+
+            shapeControl.updateGrid();
         }
 
         // e & f
@@ -209,6 +213,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let shapeControl = this.shapeControls[3];
 
             shapeControl.handle.position.set(f, e, 0);
+
+            shapeControl.updateGrid();
         }
 
         // Constraints
