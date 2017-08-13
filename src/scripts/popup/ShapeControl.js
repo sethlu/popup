@@ -51,6 +51,10 @@ function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 
 
     this.func = func;
 
+    // Internal
+
+    this.visible = false;
+
 }
 
 ShapeControl.prototype = Object.assign(Object.create(THREE.Group.prototype), {

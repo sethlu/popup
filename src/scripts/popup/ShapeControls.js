@@ -7,6 +7,7 @@ function ShapeControls(camera, domElement) {
 
     this.camera = camera;
     this.domElement = domElement;
+    this.shapes = [];
     this.activeShape = null;
 
     this.enabled = true;
@@ -33,8 +34,6 @@ function ShapeControls(camera, domElement) {
 
         event.preventDefault();
 
-        if (!scope.activeShape) return;
-
         start.set(
             event.clientX / scope.domElement.offsetWidth * 2 - 1,
             - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
@@ -43,35 +42,74 @@ function ShapeControls(camera, domElement) {
         // Find intersection
 
         rayCaster.setFromCamera(start, scope.camera);
-        let intersects = rayCaster.intersectObjects(scope.activeShape.shapeControls.map(function (shapeControl) {
-            return shapeControl.handle.background;
-        }));
 
-        if (intersects.length === 0) return;
-        let intersect = intersects[0];
+        if (scope.activeShape) {
 
-        activeShapeControl = intersect.object.parent.parent;
+            let intersects = rayCaster.intersectObjects(scope.activeShape.shapeControls.map(function (shapeControl) {
+                return shapeControl.handle.background;
+            }));
 
-        scope.activeShape.shapeControls.map(function (shapeControl) {
-            let handle = shapeControl.handle;
+            if (intersects.length > 0) {
+                // Found intersection with a shape control
 
-            new TWEEN.Tween(handle.background.material).to({
-                opacity: shapeControl === activeShapeControl ? BACKGROUND_OPACITY : 0
-            }, 100).start();
+                let intersect = intersects[0];
 
-            for (let arrow of handle.arrows) {
-                new TWEEN.Tween(arrow.material).to({
-                    opacity: shapeControl === activeShapeControl ? ARROW_OPACITY : 0
-                }, 100).start();
+                activeShapeControl = intersect.object.parent.parent;
+
+                scope.activeShape.shapeControls.forEach(function (shapeControl) {
+                    let handle = shapeControl.handle;
+
+                    new TWEEN.Tween(handle.background.material).to({
+                        opacity: shapeControl === activeShapeControl ? BACKGROUND_OPACITY : 0
+                    }, 100).start();
+
+                    for (let arrow of handle.arrows) {
+                        new TWEEN.Tween(arrow.material).to({
+                            opacity: shapeControl === activeShapeControl ? ARROW_OPACITY : 0
+                        }, 100).start();
+                    }
+                });
+
+                // Event listeners
+
+                scope.domElement.addEventListener("mousemove", onMouseMove);
+                scope.domElement.addEventListener("mouseup", onMouseUp);
+
+                scope.dispatchEvent(startEvent);
+
+                return;
+
             }
-        });
 
-        // Event listeners
+        }
 
-        scope.domElement.addEventListener("mousemove", onMouseMove);
-        scope.domElement.addEventListener("mouseup", onMouseUp);
+        if (scope.shapes.length > 0) {
+            // Not intersecting any shape control, try to find available shapes
 
-        scope.dispatchEvent(startEvent);
+            let intersects = rayCaster.intersectObjects(scope.shapes.map(function (shape) {
+                return shape.debugMesh0;
+            }));
+
+            if (intersects.length > 0) {
+                // Found available shape for manipulation
+
+                let intersect = intersects[0];
+
+                scope.activeShape = intersect.object.parent;
+
+                for (let shape of scope.shapes) {
+                    for (let shapeControl of shape.shapeControls) {
+                        shapeControl.visible = shape === scope.activeShape;
+                    }
+                }
+
+                scope.update(true); // Force update control handles
+
+                return;
+
+            }
+
+        }
 
     }
 

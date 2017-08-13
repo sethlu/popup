@@ -21,25 +21,16 @@ let fold = new Fold(
 base.gullies[0].shapes.push(fold);
 base.gullies[0].add(fold);
 
-    let vFold = new VFold(
-        0.5,
-        Math.PI * 40 / 180,
-        Math.PI * 40 / 180,
-        Math.PI * 40 / 180,
-        Math.PI * 40 / 180
-    );
-    fold.gullies[0].shapes.push(vFold);
-    fold.gullies[0].add(vFold);
-
-    let parallelFold = new ParallelFold(
-        0,
-        1.5,
-        1,
-        1.5,
-        2
-    );
-    fold.gullies[4].shapes.push(parallelFold);
-    fold.gullies[4].add(parallelFold);
+let fold2 = new Fold(
+    0.5,
+    1,
+    1,
+    2,
+    -2,
+    0
+);
+fold.gullies[0].shapes.push(fold2);
+fold.gullies[0].add(fold2);
 
 // Render
 
@@ -98,7 +89,7 @@ window.addEventListener("load", function () {
     // Interactions
 
     let shapeControls = new ShapeControls(camera, renderer.domElement);
-    shapeControls.activeShape = fold;
+    shapeControls.shapes = [fold, fold2];
 
     shapeControls.addEventListener("start", function () {
        orbitControls.enabled = false;
