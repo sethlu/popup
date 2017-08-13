@@ -42,7 +42,7 @@ function Fold(origin, a, b, c, d, e) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (intersection) {
-                this.origin = intersection.point.y;
+                this.origin = intersection.point.y - (this.parent ? this.parent.shapeOrigin : 0);
             }.bind(this),
             "gully"
         ),
