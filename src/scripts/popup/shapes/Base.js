@@ -39,7 +39,32 @@ function Base() {
 
 Base.prototype = Object.assign(Object.create(Shape.prototype), {
 
-    interpolate: function (angle = Math.PI) {
+    interpolate: function (angle) {
+
+        this.setAngle(angle);
+
+        let width = this.width,
+            height = this.height;
+        angle = this.angle;
+
+        // Skip redundant interpolation
+
+        if (width === this._width
+            && height === this._height
+            && angle === this._angle) {
+
+            // Interpolate for each gully
+            for (let gully of this.gullies) {
+                gully.interpolate();
+            }
+
+            return;
+
+        }
+
+        this._width = width;
+        this._height = height;
+        this._angle = angle;
 
         // Set up foundational vectors
 

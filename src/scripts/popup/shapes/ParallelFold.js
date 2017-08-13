@@ -44,16 +44,44 @@ function ParallelFold(origin, a, b, c, d) {
 
 ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
-    interpolate: function (angle = Math.PI) {
+    interpolate: function (angle) {
 
-        this.position.set(0, this.origin, 0);
+        // Set position origin
+
+        this.position.set(0, this.origin + (this.parent ? this.parent.shapeOrigin : 0), 0);
 
         // Interpolate gullies
+
+        this.setAngle(angle);
 
         let a = this.a,
             b = this.b,
             c = this.c,
             d = this.d;
+        angle = this.angle;
+
+        // Skip redundant interpolation
+
+        if (a === this._a
+            && b === this._b
+            && c === this._c
+            && d === this._d
+            && angle === this._angle) {
+
+            // Interpolate for each gully
+            for (let gully of this.gullies) {
+                gully.interpolate();
+            }
+
+            return;
+
+        }
+
+        this._a = a;
+        this._b = b;
+        this._c = c;
+        this._d = d;
+        this._angle = angle;
 
         // Constraints
 

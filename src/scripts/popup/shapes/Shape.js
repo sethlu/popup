@@ -5,11 +5,19 @@ function Shape() {
 
     THREE.Group.call(this);
 
+    this.angle = Math.PI;
+
 }
 
 Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
 
-    interpolate: function (angle = Math.PI) {
+    setAngle: function (angle) {
+        if (angle !== undefined) {
+            this.angle = angle;
+        }
+    },
+
+    interpolate: function (angle) {
 
     }
 

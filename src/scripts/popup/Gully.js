@@ -15,6 +15,8 @@ function Gully() {
 
     this.shapeOrigin = 0;
 
+    this.angle = Math.PI;
+
     // Debug
 
     this.debugLine0 = new THREE.Line(new THREE.Geometry(), debugLineMaterial);
@@ -41,13 +43,37 @@ function Gully() {
 
 Gully.prototype = Object.assign(Object.create(THREE.Group.prototype), {
 
-    interpolate: function (angle = Math.PI) {
+    setAngle: function (angle) {
+        if (angle !== undefined) {
+            this.angle = angle;
+        }
+    },
+
+    interpolate: function (angle) {
+
+        this.setAngle(angle);
+
+        angle = this.angle;
+
+        // Skip redundant interpolation
+
+        if (angle === this._angle) {
+
+            // Interpolate for each shape
+            for (let shape of this.shapes) {
+                shape.interpolate();
+            }
+
+            return;
+
+        }
 
         this._angle = angle;
 
+        // Interpolate shapes
+
         for (let shape of this.shapes) {
             shape.interpolate(angle);
-            shape.position.add(new THREE.Vector3(0, this.shapeOrigin, 0));
         }
 
         this.debugLine0.position.setY(this.shapeOrigin);
