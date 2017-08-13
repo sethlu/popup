@@ -9,6 +9,8 @@ import {ShapeControl} from "../ShapeControl.js";
 
 let transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
+let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
+
 // TODO: Warn suitable gullies to place additional shapes
 
 function Fold(origin, a, b, c, d, e) {
@@ -101,6 +103,11 @@ function Fold(origin, a, b, c, d, e) {
     // Debug
 
     this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
+
+    this.debugMesh0 = new THREE.Mesh(new THREE.Geometry(), debugMeshMaterial);
+    this.debugMesh0.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
+    this.debugMesh0.geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(1, 2, 3), new THREE.Face3(2, 3, 4), new THREE.Face3(3, 4, 5));
+    this.add(this.debugMesh0);
 
 }
 
@@ -302,6 +309,22 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             shapeControl.handle.position.set(0, d, 0);
         }
+
+        // Debug
+
+        this.gullies[0].updateMatrix();
+        this.gullies[2].updateMatrix();
+        this.gullies[4].updateMatrix();
+
+        this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
+        this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
+        this.debugMesh0.geometry.vertices[2].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[2].matrix));
+        this.debugMesh0.geometry.vertices[3].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[2].matrix));
+        this.debugMesh0.geometry.vertices[4].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[4].matrix));
+        this.debugMesh0.geometry.vertices[5].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[4].matrix));
+        this.debugMesh0.geometry.computeFaceNormals();
+        this.debugMesh0.geometry.verticesNeedUpdate = true;
+        this.debugMesh0.geometry.normalsNeedUpdate = true;
 
     }
 
