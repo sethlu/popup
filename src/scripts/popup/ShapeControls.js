@@ -149,8 +149,8 @@ function ShapeControls(camera, domElement) {
                 return;
         }
 
-        intersects.point = referenceObject.worldToLocal(new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z));
-        activeShapeControl.func(intersects);
+        let point = referenceObject.worldToLocal(new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z));
+        activeShapeControl.func(point);
 
     }
 

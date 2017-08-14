@@ -44,8 +44,8 @@ function Fold(origin, a, b, c, d, e, f) {
         // origin
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-            function (intersection) {
-                this.origin = intersection.point.y - (this.parent ? this.parent.shapeOrigin : 0);
+            function (point) {
+                this.origin = Math.round((point.y - (this.parent ? this.parent.shapeOrigin : 0)) * 2) / 2;
             }.bind(this),
             "gully"
         ),
@@ -53,9 +53,9 @@ function Fold(origin, a, b, c, d, e, f) {
         // a & b
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-            function (intersection) {
-                this.a = intersection.point.y;
-                this.b = intersection.point.x;
+            function (point) {
+                this.a = Math.max(Math.round(point.y * 2) / 2, 0);
+                this.b = Math.round(point.x * 2) / 2;
             }.bind(this),
             undefined,
             2
@@ -64,9 +64,9 @@ function Fold(origin, a, b, c, d, e, f) {
         // c & d
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-            function (intersection) {
-                this.c = intersection.point.y;
-                this.d = intersection.point.x;
+            function (point) {
+                this.c = Math.max(Math.round(point.y * 2) / 2, 0);
+                this.d = Math.round(point.x * 2) / 2;
             }.bind(this),
             undefined,
             2
@@ -76,9 +76,9 @@ function Fold(origin, a, b, c, d, e, f) {
         function () {
             let shapeControl = new ShapeControl(
                 [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-                function (intersection) {
-                    this.e = intersection.point.y;
-                    this.f = intersection.point.x;
+                function (point) {
+                    this.e = Math.max(Math.round(point.y * 2) / 2, 0);
+                    this.f = Math.round(point.x * 2) / 2;
                 }.bind(this),
                 undefined,
                 2
