@@ -13,7 +13,7 @@ let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading:
 
 // TODO: Warn suitable gullies to place additional shapes
 
-function Fold(origin, a, b, c, d, e, f) {
+function Fold(origin, a, b, c, d, e, f, g) {
 
     Shape.call(this);
 
@@ -24,6 +24,7 @@ function Fold(origin, a, b, c, d, e, f) {
     this.d = d;
     this.e = e;
     this.f = f;
+    this.g = g;
 
     // Gullies
 
@@ -94,6 +95,29 @@ function Fold(origin, a, b, c, d, e, f) {
             shapeControl.setRotationFromMatrix(rotationMatrix);
 
             return shapeControl;
+        }.bind(this)(),
+
+        // g
+        function () {
+            let shapeControl = new ShapeControl(
+                [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+                function (point) {
+                    this.g = Math.round(Math.atan2(point.y - this.e, point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI);
+                }.bind(this),
+                undefined,
+                2
+            );
+
+            let rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.elements = [
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                1, 0, 0, 0,
+                0, 0, 0, 1
+            ];
+            shapeControl.setRotationFromMatrix(rotationMatrix);
+
+            return shapeControl;
         }.bind(this)()
 
     ];
@@ -127,7 +151,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             c = this.c,
             d = this.d,
             e = this.e,
-            f = this.f;
+            f = this.f,
+            g = this.g;
         angle = this.angle;
 
         // Skip redundant interpolation
@@ -138,6 +163,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             && d === this._d
             && e === this._e
             && f === this._f
+            && g === this._g
             && angle === this._angle) {
 
             // Interpolate for each gully
@@ -155,6 +181,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         this._d = d;
         this._e = e;
         this._f = f;
+        this._g = g;
         this._angle = angle;
 
         // Set up foundational vectors
@@ -164,6 +191,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         let p1 = new THREE.Vector3(c, d);
         let p2 = new THREE.Vector3(-a, b);
+        let p0 = new THREE.Vector3(0, f - e / Math.tan(g));
 
         // Shape controls
 
@@ -217,23 +245,32 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             shapeControl.updateGrid();
         }
 
+        // g
+        {
+            let shapeControl = this.shapeControls[4];
+
+            shapeControl.handle.position.set(f + Math.cos(g) * 0.5, e + Math.sin(g) * 0.5, 0);
+
+            shapeControl.updateGrid();
+        }
+
         // Constraints
 
-        if (b >= 0 && d <= 0 || b <= 0 && d >= 0) {
-            console.warn("Constraint failed: b, d < or > 0");
+        if (b >= p0.y && d <= p0.y || b <= p0.y && d >= p0.y) {
+            console.warn("Constraint failed: b, d < or > p0.y");
             return;
         }
 
-        let shapeDirection = b >= 0;
+        let shapeDirection = b >= p0.y;
 
         // Case folds
 
-        if (isFinite(d)) {
+        if (!isAlmostInfinite(p0.y)) {
 
             // V-fold
 
-            let v1 = p1,
-                v2 = p2;
+            let v1 = p1.clone().sub(p0),
+                v2 = p2.clone().sub(p0);
 
             let va, vb,
                 vc = v2.angleTo(shapeForward),
@@ -241,7 +278,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let x = solveWithNewtonRaphsonMethod(function (x) {
                 let y = Math.sqrt(e * e - x * x);
-                let v3 = new THREE.Vector3(x, f, y);
+                let v3 = new THREE.Vector3(x, f, y).sub(p0);
 
                 let va = v2.angleTo(v3);
                 let vb = v1.angleTo(v3);
@@ -251,7 +288,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             });
             let y = Math.sqrt(e * e - x * x);
 
-            let v3 = new THREE.Vector3(x, f, y);
+            let v3 = new THREE.Vector3(x, f, y).sub(p0);
 
             va = v2.angleTo(v3);
             vb = v1.angleTo(v3);
@@ -265,7 +302,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             this.gullies.forEach(function (gully, i) {
 
-                gully.position.copy(fold.gullies[i].position);
+                gully.position.copy(fold.gullies[i].position.clone().add(p0));
                 gully.quaternion.copy(fold.gullies[i].quaternion);
 
                 gully.interpolate(fold.gullies[i].angle);
@@ -290,7 +327,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let p3 = new THREE.Vector3(x, 0, y);
 
-            let fold = new ParallelFold(0, a, c, p2.distanceTo(p3), p1.distanceTo(p3));
+            let fold = new ParallelFold(0, a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3));
             fold.interpolate(angle);
 
             this.gullies.forEach(function (gully, i) {
@@ -331,6 +368,10 @@ function solveWithNewtonRaphsonMethod(func, x = 0, epsilon = EPSILON, delta = EP
         ++i;
     }
     return x;
+}
+
+function isAlmostInfinite(num) {
+    return Math.abs(num) > Number.MAX_SAFE_INTEGER / 2;
 }
 
 export {Fold};
