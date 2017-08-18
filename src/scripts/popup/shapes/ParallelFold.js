@@ -83,6 +83,57 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
         this._d = d;
         this._angle = angle;
 
+        // Interpolation
+
+        let interpolation = ParallelFold.interpolate(a, b, c, d, angle);
+
+        let gullyRotationMatrix = new THREE.Matrix4();
+
+        interpolation.gullies.forEach(function (gullyInterpolation, i) {
+
+            let gully = this.gullies[i],
+                {gullyPosition, gullyRight, gullyDirection, gullyUp, gullyAngle} = gullyInterpolation;
+
+            gully.position.copy(gullyPosition);
+
+            gullyRotationMatrix.elements = [
+                gullyRight.x, gullyRight.y, gullyRight.z, 0,
+                gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
+                gullyUp.x, gullyUp.y, gullyUp.z, 0,
+                0, 0, 0, 1
+            ];
+            gully.setRotationFromMatrix(gullyRotationMatrix);
+
+            gully.interpolate(gullyAngle);
+
+        }, this);
+
+        // Debug
+
+        this.debugMesh0.geometry.vertices[0].setX(interpolation.p1.x);
+        this.debugMesh0.geometry.vertices[0].setZ(interpolation.p1.z);
+        this.debugMesh0.geometry.vertices[1].setX(interpolation.p3.x);
+        this.debugMesh0.geometry.vertices[1].setZ(interpolation.p3.z);
+        this.debugMesh0.geometry.vertices[2].setX(interpolation.p2.x);
+        this.debugMesh0.geometry.vertices[2].setZ(interpolation.p2.z);
+        this.debugMesh0.geometry.vertices[3].setX(interpolation.p1.x);
+        this.debugMesh0.geometry.vertices[3].setZ(interpolation.p1.z);
+        this.debugMesh0.geometry.vertices[4].setX(interpolation.p3.x);
+        this.debugMesh0.geometry.vertices[4].setZ(interpolation.p3.z);
+        this.debugMesh0.geometry.vertices[5].setX(interpolation.p2.x);
+        this.debugMesh0.geometry.vertices[5].setZ(interpolation.p2.z);
+        this.debugMesh0.geometry.computeFaceNormals();
+        this.debugMesh0.geometry.verticesNeedUpdate = true;
+        this.debugMesh0.geometry.normalsNeedUpdate = true;
+
+    }
+
+});
+
+Object.assign(ParallelFold, {
+
+    interpolate: function (a, b, c, d, angle) {
+
         // Constraints
 
         if ([a, b, c, d].some(function (x) {return x < 0;})) {
@@ -119,7 +170,7 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         let gullyDirection = shapeForward;
 
-        [
+        let gullies = [
             [
                 p1,
                 p1.clone().normalize().add(p1p3.clone().normalize()).multiplyScalar(0.5).normalize(),
@@ -156,7 +207,7 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
                 p2.clone().negate().angleTo(p2p3),
                 false
             ]
-        ].forEach(function (_, i) {
+        ].map(function (_) {
 
             let [gullyPosition, gullyUp, gullyAngle, useSupplementaryAngle] = _;
 
@@ -164,42 +215,22 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let gullyRight = gullyDirection.clone().cross(gullyUp).normalize();
 
-            // Update the gully
-
-            let gully = this.gullies[i];
-
-            gully.position.copy(gullyPosition);
-
-            let gullyRotationMatrix = new THREE.Matrix4();
-            gullyRotationMatrix.elements = [
-                gullyRight.x, gullyRight.y, gullyRight.z, 0,
-                gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
-                gullyUp.x, gullyUp.y, gullyUp.z, 0,
-                0, 0, 0, 1
-            ];
-            gully.setRotationFromMatrix(gullyRotationMatrix);
-
-            gully.interpolate(gullyAngle);
+            return {
+                gullyPosition,
+                gullyRight,
+                gullyDirection,
+                gullyUp,
+                gullyAngle
+            };
 
         }, this);
 
-        // Debug
+        return {
+            gullies,
 
-        this.debugMesh0.geometry.vertices[0].setX(p1.x);
-        this.debugMesh0.geometry.vertices[0].setZ(p1.z);
-        this.debugMesh0.geometry.vertices[1].setX(p3.x);
-        this.debugMesh0.geometry.vertices[1].setZ(p3.z);
-        this.debugMesh0.geometry.vertices[2].setX(p2.x);
-        this.debugMesh0.geometry.vertices[2].setZ(p2.z);
-        this.debugMesh0.geometry.vertices[3].setX(p1.x);
-        this.debugMesh0.geometry.vertices[3].setZ(p1.z);
-        this.debugMesh0.geometry.vertices[4].setX(p3.x);
-        this.debugMesh0.geometry.vertices[4].setZ(p3.z);
-        this.debugMesh0.geometry.vertices[5].setX(p2.x);
-        this.debugMesh0.geometry.vertices[5].setZ(p2.z);
-        this.debugMesh0.geometry.computeFaceNormals();
-        this.debugMesh0.geometry.verticesNeedUpdate = true;
-        this.debugMesh0.geometry.normalsNeedUpdate = true;
+            // Debug use
+            p1, p2, p3
+        };
 
     }
 

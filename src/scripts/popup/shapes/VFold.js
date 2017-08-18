@@ -41,20 +41,15 @@ function VFold(origin, a, b, c, d) {
 
     // Debug
 
-    // this.debugLine0 = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0xff00ff}));
+    // this.debugLine0 = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0xff0000}));
     // this.debugLine0.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3());
     // this.add(this.debugLine0);
-
     // this.debugLine1 = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0xff0000}));
     // this.debugLine1.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3());
     // this.add(this.debugLine1);
-
     // this.debugLine2 = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0xff0000}));
     // this.debugLine2.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3());
     // this.add(this.debugLine2);
-    // this.debugLine3 = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0xff0000}));
-    // this.debugLine3.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3());
-    // this.add(this.debugLine3);
 
     this.debugMesh0 = new THREE.Mesh(new THREE.Geometry(), debugMeshMaterial);
     this.debugMesh0.geometry.vertices.push(
@@ -109,6 +104,52 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
         this._d = d;
         this._angle = angle;
 
+        // Interpolation
+
+        let interpolation = VFold.interpolate(a, b, c, d, angle);
+        let gullyRotationMatrix = new THREE.Matrix4();
+
+        interpolation.gullies.forEach(function (gullyInterpolation, i) {
+
+            let gully = this.gullies[i],
+                {gullyRight, gullyDirection, gullyUp, gullyAngle} = gullyInterpolation;
+
+            gullyRotationMatrix.elements = [
+                gullyRight.x, gullyRight.y, gullyRight.z, 0,
+                gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
+                gullyUp.x, gullyUp.y, gullyUp.z, 0,
+                0, 0, 0, 1
+            ];
+            gully.setRotationFromMatrix(gullyRotationMatrix);
+
+            gully.interpolate(gullyAngle);
+
+        }, this);
+
+        // Debug
+
+        // this.debugLine0.geometry.vertices[1].copy(interpolation.v1);
+        // this.debugLine0.geometry.verticesNeedUpdate = true;
+        // this.debugLine1.geometry.vertices[1].copy(interpolation.v2);
+        // this.debugLine1.geometry.verticesNeedUpdate = true;
+        // this.debugLine2.geometry.vertices[1].copy(interpolation.v3);
+        // this.debugLine2.geometry.verticesNeedUpdate = true;
+
+        this.debugMesh0.geometry.vertices[1].copy(interpolation.n1);
+        this.debugMesh0.geometry.vertices[2].copy(interpolation.v3);
+        this.debugMesh0.geometry.vertices[3].copy(interpolation.n2);
+        this.debugMesh0.geometry.computeFaceNormals();
+        this.debugMesh0.geometry.verticesNeedUpdate = true;
+        this.debugMesh0.geometry.normalsNeedUpdate = true;
+
+    }
+
+});
+
+Object.assign(VFold, {
+
+    interpolate: function (a, b, c, d, angle) {
+
         // Constraints
 
         if (c >= Math.PI / 2 && d <= Math.PI / 2 || c <= Math.PI / 2 && d >= Math.PI / 2) {
@@ -147,11 +188,6 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
             .applyAxisAngle(shapeForward, - angle / 2);
         let d2 = n2.dot(v2);
 
-        // this.debugLine2.geometry.vertices[1].copy(v1);
-        // this.debugLine2.geometry.verticesNeedUpdate = true;
-        // this.debugLine3.geometry.vertices[1].copy(v2);
-        // this.debugLine3.geometry.verticesNeedUpdate = true;
-
         // Find planar intersection
 
         let cross = n1.clone().cross(n2);
@@ -179,10 +215,6 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
         // Since we are setting the origin as the origin for the working space, the linePoint may overlap the origin, failing the following computation
         if (linePoint.lengthSq() < Number.EPSILON) linePoint.add(lineDirection);
 
-        // this.debugLine0.geometry.vertices[0].copy(linePoint.clone().add(lineDirection.clone().multiplyScalar(-10)));
-        // this.debugLine0.geometry.vertices[1].copy(linePoint.clone().add(lineDirection.clone().multiplyScalar(10)));
-        // this.debugLine0.geometry.verticesNeedUpdate = true;
-
         // Find v-fold direction
 
         let vectorDistanceSquared = v1.lengthSq();
@@ -195,22 +227,21 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
             + vectorDistanceToLineFoot * (shapeDirection ? 1 : -1);
         let v3 = linePoint.clone().add(lineDirection.clone().multiplyScalar(vectorDistanceToLinePoint)).normalize();
 
-        // this.debugLine1.geometry.vertices[1].copy(v3);
-        // this.debugLine1.geometry.verticesNeedUpdate = true;
-
         // Gullies
 
-        [
+        let gullyPosition = new THREE.Vector3(0, 0, 0);
+
+        let gullies = [
             [n1, v1, v3, false],
             [n1, v3, shapeForward, false],
             [v3, n1, n2, shapeDirection],
             [v3, n2, n1, !shapeDirection],
             [n2, v3, v2, false],
             [n2, shapeForward, v3, false]
-        ].forEach(function (_, i) {
+        ].map(function (_) {
 
             let [gullyDirection, rightNeighborDirection, leftNeighborDirection, useSupplementaryAngle] = _;
-            
+
             let rightNeighborToGully = rightNeighborDirection.clone()
                 .add(gullyDirection.clone().multiplyScalar(- Math.cos(gullyDirection.angleTo(rightNeighborDirection))))
                 .normalize();
@@ -230,31 +261,23 @@ VFold.prototype = Object.assign(Object.create(Shape.prototype), {
                 ).normalize();
             let gullyUp = gullyRight.clone().cross(gullyDirection).normalize();
 
-            // Update the gully
+            return {
+                gullyPosition,
+                gullyRight,
+                gullyDirection,
+                gullyUp,
+                gullyAngle
+            };
 
-            let gully = this.gullies[i];
+        });
 
-            let gullyRotationMatrix = new THREE.Matrix4();
-            gullyRotationMatrix.elements = [
-                gullyRight.x, gullyRight.y, gullyRight.z, 0,
-                gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
-                gullyUp.x, gullyUp.y, gullyUp.z, 0,
-                0, 0, 0, 1
-            ];
-            gully.setRotationFromMatrix(gullyRotationMatrix);
+        return {
+            gullies,
 
-            gully.interpolate(gullyAngle);
-
-        }, this);
-
-        // Debug
-
-        this.debugMesh0.geometry.vertices[1].copy(n1);
-        this.debugMesh0.geometry.vertices[2].copy(v3);
-        this.debugMesh0.geometry.vertices[3].copy(n2);
-        this.debugMesh0.geometry.computeFaceNormals();
-        this.debugMesh0.geometry.verticesNeedUpdate = true;
-        this.debugMesh0.geometry.normalsNeedUpdate = true;
+            // Debug use
+            v1, v2, v3,
+            n1, n2
+        };
 
     }
 
