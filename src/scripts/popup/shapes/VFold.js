@@ -1,6 +1,6 @@
 
 import * as THREE from "three";
-import {EPSILON} from "../consts.js";
+import {EPSILON, VEC3_RIGHT as shapeRight, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
 import {Shape} from "./Shape.js";
 import {Gully} from "../Gully.js";
 
@@ -150,12 +150,6 @@ Object.assign(VFold, {
         }
 
         // TODO: Derive constraint for max open angle when > 180 deg
-
-        // Set up foundational vectors
-
-        let shapeForward = new THREE.Vector3(0, 1, 0);
-        let shapeUp = new THREE.Vector3(0, 0, 1);
-        let shapeRight = new THREE.Vector3(1, 0, 0);
 
         let n1 = shapeUp.clone()
             .applyAxisAngle(shapeRight, d - Math.PI / 2)

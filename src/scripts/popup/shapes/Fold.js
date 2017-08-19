@@ -1,6 +1,6 @@
 
 import * as THREE from "three";
-import {EPSILON} from "../consts.js";
+import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
 import {Shape} from "./Shape.js";
 import {Gully} from "../Gully.js";
 import {ParallelFold} from "./ParallelFold.js";
@@ -184,11 +184,6 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         this._g = g;
         this._angle = angle;
 
-        // Set up foundational vectors
-
-        let shapeForward = new THREE.Vector3(0, 1, 0);
-        let shapeUp = new THREE.Vector3(0, 0, 1);
-
         // Shape controls
 
         let c1 = shapeUp.clone()
@@ -292,10 +287,6 @@ Object.assign(Fold, {
         }
 
         let shapeDirection = b >= p0.y;
-
-        // Set up foundational vectors
-
-        let shapeForward = new THREE.Vector3(0, 1, 0);
 
         // Case folds
 

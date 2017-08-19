@@ -1,6 +1,6 @@
 
 import * as THREE from "three";
-import {EPSILON} from "../consts.js";
+import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
 import {Shape} from "./Shape.js";
 import {Gully} from "../Gully.js";
 
@@ -127,12 +127,6 @@ Object.assign(ParallelFold, {
             console.warn("Constraint failed: c + d < a + b && angle limited by parallel fold");
             return;
         }
-
-        // Set up foundational vectors
-
-        let shapeForward = new THREE.Vector3(0, 1, 0);
-        let shapeUp = new THREE.Vector3(0, 0, 1);
-        let shapeRight = new THREE.Vector3(1, 0, 0);
 
         // Find parallel-fold position
 
