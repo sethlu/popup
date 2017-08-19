@@ -87,26 +87,7 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         let interpolation = ParallelFold.interpolate(a, b, c, d, angle);
 
-        let gullyRotationMatrix = new THREE.Matrix4();
-
-        interpolation.gullies.forEach(function (gullyInterpolation, i) {
-
-            let gully = this.gullies[i],
-                {gullyPosition, gullyRight, gullyDirection, gullyUp, gullyAngle} = gullyInterpolation;
-
-            gully.position.copy(gullyPosition);
-
-            gullyRotationMatrix.elements = [
-                gullyRight.x, gullyRight.y, gullyRight.z, 0,
-                gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
-                gullyUp.x, gullyUp.y, gullyUp.z, 0,
-                0, 0, 0, 1
-            ];
-            gully.setRotationFromMatrix(gullyRotationMatrix);
-
-            gully.interpolate(gullyAngle);
-
-        }, this);
+        this.applyInterpolation(interpolation);
 
         // Debug
 
