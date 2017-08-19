@@ -189,10 +189,6 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         let shapeForward = new THREE.Vector3(0, 1, 0);
         let shapeUp = new THREE.Vector3(0, 0, 1);
 
-        let p1 = new THREE.Vector3(c, d);
-        let p2 = new THREE.Vector3(-a, b);
-        let p0 = new THREE.Vector3(0, f - e / Math.tan(g));
-
         // Shape controls
 
         let c1 = shapeUp.clone()
@@ -254,6 +250,65 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             shapeControl.updateGrid();
         }
 
+        // Interpolation
+
+        let interpolation = Fold.interpolate(a, b, c, d, e, f, g, angle);
+
+        if (interpolation) {
+
+            let gullyRotationMatrix = new THREE.Matrix4();
+
+            interpolation.gullies.forEach(function (gullyInterpolation, i) {
+
+                let gully = this.gullies[i],
+                    {gullyPosition, gullyRight, gullyDirection, gullyUp, gullyAngle, shapeOrigin} = gullyInterpolation;
+
+                gully.position.copy(gullyPosition);
+
+                gullyRotationMatrix.elements = [
+                    gullyRight.x, gullyRight.y, gullyRight.z, 0,
+                    gullyDirection.x, gullyDirection.y, gullyDirection.z, 0,
+                    gullyUp.x, gullyUp.y, gullyUp.z, 0,
+                    0, 0, 0, 1
+                ];
+                gully.setRotationFromMatrix(gullyRotationMatrix);
+
+                gully.shapeOrigin = shapeOrigin || 0;
+
+                gully.interpolate(gullyAngle);
+
+            }, this);
+
+        }
+
+        // Debug
+
+        this.gullies[0].updateMatrix();
+        this.gullies[2].updateMatrix();
+        this.gullies[4].updateMatrix();
+
+        this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
+        this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
+        this.debugMesh0.geometry.vertices[2].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[2].matrix));
+        this.debugMesh0.geometry.vertices[3].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[2].matrix));
+        this.debugMesh0.geometry.vertices[4].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[4].matrix));
+        this.debugMesh0.geometry.vertices[5].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[4].matrix));
+        this.debugMesh0.geometry.computeFaceNormals();
+        this.debugMesh0.geometry.verticesNeedUpdate = true;
+        this.debugMesh0.geometry.normalsNeedUpdate = true;
+
+    }
+
+});
+
+Object.assign(Fold, {
+
+    interpolate: function (a, b, c, d, e, f, g, angle) {
+
+        let p1 = new THREE.Vector3(c, d);
+        let p2 = new THREE.Vector3(-a, b);
+        let p0 = new THREE.Vector3(0, f - e / Math.tan(g));
+
         // Constraints
 
         if (b >= p0.y && d <= p0.y || b <= p0.y && d >= p0.y) {
@@ -262,6 +317,10 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         }
 
         let shapeDirection = b >= p0.y;
+
+        // Set up foundational vectors
+
+        let shapeForward = new THREE.Vector3(0, 1, 0);
 
         // Case folds
 
@@ -293,21 +352,16 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             va = v2.angleTo(v3);
             vb = v1.angleTo(v3);
 
-            let fold = new VFold(0, va, vb, vc, vd);
-            fold.interpolate(angle);
+            // Calling interpolation
 
-            this.gullies[0].shapeOrigin = this.gullies[1].shapeOrigin = v1.length();
-            this.gullies[2].shapeOrigin = this.gullies[3].shapeOrigin = v3.length();
-            this.gullies[4].shapeOrigin = this.gullies[5].shapeOrigin = v2.length();
+            let interpolation = VFold.interpolate(va, vb, vc, vd, angle);
 
-            this.gullies.forEach(function (gully, i) {
+            if (interpolation) interpolation.gullies.forEach(function (gully, i) {
+                gully.gullyPosition = gully.gullyPosition.clone().add(p0);
+                gully.shapeOrigin = [v1, v3, v2][Math.floor(i / 2)].length();
+            });
 
-                gully.position.copy(fold.gullies[i].position.clone().add(p0));
-                gully.quaternion.copy(fold.gullies[i].quaternion);
-
-                gully.interpolate(fold.gullies[i].angle);
-
-            }, this);
+            return interpolation;
 
         } else {
 
@@ -327,35 +381,11 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
             let p3 = new THREE.Vector3(x, 0, y);
 
-            let fold = new ParallelFold(0, a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3));
-            fold.interpolate(angle);
+            // Calling interpolation
 
-            this.gullies.forEach(function (gully, i) {
-
-                gully.position.copy(fold.gullies[i].position);
-                gully.quaternion.copy(fold.gullies[i].quaternion);
-
-                gully.interpolate(fold.gullies[i].angle);
-
-            }, this);
+            return ParallelFold.interpolate(a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3), angle);
 
         }
-
-        // Debug
-
-        this.gullies[0].updateMatrix();
-        this.gullies[2].updateMatrix();
-        this.gullies[4].updateMatrix();
-
-        this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
-        this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
-        this.debugMesh0.geometry.vertices[2].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[2].matrix));
-        this.debugMesh0.geometry.vertices[3].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[2].matrix));
-        this.debugMesh0.geometry.vertices[4].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[4].matrix));
-        this.debugMesh0.geometry.vertices[5].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[4].matrix));
-        this.debugMesh0.geometry.computeFaceNormals();
-        this.debugMesh0.geometry.verticesNeedUpdate = true;
-        this.debugMesh0.geometry.normalsNeedUpdate = true;
 
     }
 
