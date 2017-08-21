@@ -73,10 +73,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
                 [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
                 function (point) {
                     this.e = Math.max(Math.round(point.y * 2) / 2, 0);
-                    this.f = Math.round(point.x * 2) / 2;
-                }.bind(this),
-                undefined,
-                2
+                }.bind(this)
             );
 
             let rotationMatrix = new THREE.Matrix4();

@@ -14,7 +14,8 @@ let fold = new Fold(
     0,
     1, 0,
     1, 0,
-    1, 0.5, 0
+    1, 0,
+    0
 );
 base.gullies[0].shapes.push(fold);
 base.gullies[0].add(fold);
@@ -23,7 +24,8 @@ let fold2 = new Fold(
     0.5,
     1, 0,
     1, 0,
-    1, 0.5, 0
+    1, 0,
+    0
 );
 fold.gullies[0].shapes.push(fold2);
 fold.gullies[0].add(fold2);
