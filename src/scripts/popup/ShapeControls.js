@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import TWEEN from "tween.js";
 import {BACKGROUND_OPACITY, ARROW_OPACITY} from "./ShapeControl.js";
+import {EPSILON} from "./consts";
 
 function ShapeControls(camera, domElement) {
 
@@ -21,12 +22,21 @@ function ShapeControls(camera, domElement) {
 
     let start = new THREE.Vector2();
     let end = new THREE.Vector2();
-    let delta = new THREE.Vector2();
 
     let activeShapeControl = null;
 
     let rayCaster = new THREE.Raycaster();
     rayCaster.linePrecision = 1;
+
+    function attachMouseMoveAndUpListeners() {
+        scope.domElement.addEventListener("mousemove", onMouseMove);
+        scope.domElement.addEventListener("mouseup", onMouseUp);
+    }
+
+    function detachMouseMoveAndUpListeners() {
+        scope.domElement.removeEventListener("mousemove", onMouseMove);
+        scope.domElement.removeEventListener("mouseup", onMouseUp);
+    }
 
     function onMouseDown(event) {
 
@@ -38,6 +48,8 @@ function ShapeControls(camera, domElement) {
             event.clientX / scope.domElement.offsetWidth * 2 - 1,
             - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
         );
+
+        end.copy(start); // Reset end position
 
         // Find intersection
 
@@ -70,46 +82,15 @@ function ShapeControls(camera, domElement) {
                     }
                 });
 
-                // Event listeners
-
-                scope.domElement.addEventListener("mousemove", onMouseMove);
-                scope.domElement.addEventListener("mouseup", onMouseUp);
-
                 scope.dispatchEvent(startEvent);
 
-                return;
-
             }
 
         }
 
-        if (scope.shapes.length > 0) {
-            // Not intersecting any shape control, try to find available shapes
+        // Event listeners
 
-            let intersects = rayCaster.intersectObjects(scope.shapes.map(function (shape) {
-                return shape.debugMesh0;
-            }));
-
-            if (intersects.length > 0) {
-                // Found available shape for manipulation
-
-                let intersect = intersects[0];
-
-                scope.activeShape = intersect.object.parent;
-
-                for (let shape of scope.shapes) {
-                    for (let shapeControl of shape.shapeControls) {
-                        shapeControl.visible = shape === scope.activeShape;
-                    }
-                }
-
-                scope.update(true); // Force update control handles
-
-                return;
-
-            }
-
-        }
+        attachMouseMoveAndUpListeners();
 
     }
 
@@ -123,34 +104,37 @@ function ShapeControls(camera, domElement) {
             event.clientX / scope.domElement.offsetWidth * 2 - 1,
             - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
         );
-        // delta.subVectors(end, start);
-        // start.copy(end);
 
-        // Find intersections
+        if (activeShapeControl) {
 
-        rayCaster.setFromCamera(end, scope.camera);
-        let intersects = rayCaster.intersectObjects(activeShapeControl.ranges);
+            // Find intersections
 
-        if (intersects.length === 0) return;
-        let intersect = intersects[0];
+            rayCaster.setFromCamera(end, scope.camera);
 
-        let referenceObject;
-        switch (activeShapeControl.referenceSpace) {
-            case "gully":
-                referenceObject = scope.activeShape.parent;
-                break;
-            case "shape":
-                referenceObject = scope.activeShape;
-                break;
-            case "shapeControl":
-                referenceObject = activeShapeControl;
-                break;
-            default:
-                return;
+            let intersects = rayCaster.intersectObjects(activeShapeControl.ranges);
+
+            if (intersects.length === 0) return;
+            let intersect = intersects[0];
+
+            let referenceObject;
+            switch (activeShapeControl.referenceSpace) {
+                case "gully":
+                    referenceObject = scope.activeShape.parent;
+                    break;
+                case "shape":
+                    referenceObject = scope.activeShape;
+                    break;
+                case "shapeControl":
+                    referenceObject = activeShapeControl;
+                    break;
+                default:
+                    return;
+            }
+
+            let point = referenceObject.worldToLocal(new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z));
+            activeShapeControl.func(point);
+
         }
-
-        let point = referenceObject.worldToLocal(new THREE.Vector3(intersect.point.x, intersect.point.y, intersect.point.z));
-        activeShapeControl.func(point);
 
     }
 
@@ -158,30 +142,60 @@ function ShapeControls(camera, domElement) {
 
         if (scope.enabled === false) return;
 
+        event.preventDefault();
+
         // Event listeners
 
-        scope.domElement.removeEventListener("mousemove", onMouseMove);
-        scope.domElement.removeEventListener("mouseup", onMouseUp);
+        detachMouseMoveAndUpListeners();
 
-        scope.dispatchEvent(endEvent);
+        if (activeShapeControl) {
 
-        // Internals
+            scope.dispatchEvent(endEvent);
 
-        scope.activeShape.shapeControls.map(function (shapeControl) {
-            let handle = shapeControl.handle;
+            scope.activeShape.shapeControls.map(function (shapeControl) {
+                let handle = shapeControl.handle;
 
-            new TWEEN.Tween(handle.background.material).to({
-                opacity: BACKGROUND_OPACITY
-            }, 100).start();
-
-            for (let arrow of handle.arrows) {
-                new TWEEN.Tween(arrow.material).to({
-                    opacity: ARROW_OPACITY
+                new TWEEN.Tween(handle.background.material).to({
+                    opacity: BACKGROUND_OPACITY
                 }, 100).start();
-            }
-        });
 
-        activeShapeControl = null;
+                for (let arrow of handle.arrows) {
+                    new TWEEN.Tween(arrow.material).to({
+                        opacity: ARROW_OPACITY
+                    }, 100).start();
+                }
+            });
+
+            activeShapeControl = null;
+
+        } else if (end.distanceToSquared(start) < EPSILON) {
+
+            if (scope.shapes.length > 0) {
+
+                let intersects = rayCaster.intersectObjects(scope.shapes.map(function (shape) {
+                    return shape.debugMesh0;
+                }));
+
+                if (intersects.length > 0) {
+                    // Found available shape for manipulation
+
+                    let intersect = intersects[0];
+
+                    scope.activeShape = intersect.object.parent;
+
+                    for (let shape of scope.shapes) {
+                        for (let shapeControl of shape.shapeControls) {
+                            shapeControl.visible = shape === scope.activeShape;
+                        }
+                    }
+
+                    scope.update(true); // Force update control handles
+
+                }
+
+            }
+
+        }
 
     }
 
