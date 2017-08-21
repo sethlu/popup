@@ -38,25 +38,23 @@ function ShapeControls(camera, domElement) {
         scope.domElement.removeEventListener("mouseup", onMouseUp);
     }
 
-    function onMouseDown(event) {
+    function attachTouchMoveAndEndListeners() {
+        scope.domElement.addEventListener("touchmove", onTouchMove);
+        scope.domElement.addEventListener("touchend", onTouchEnd);
+    }
 
-        if (scope.enabled === false) return;
+    function detachTouchMoveAndEndListeners() {
+        scope.domElement.removeEventListener("touchmove", onTouchMove);
+        scope.domElement.removeEventListener("touchend", onTouchEnd);
+    }
 
-        event.preventDefault();
-
-        start.set(
-            event.clientX / scope.domElement.offsetWidth * 2 - 1,
-            - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
-        );
-
-        end.copy(start); // Reset end position
-
-        // Find intersection
-
-        rayCaster.setFromCamera(start, scope.camera);
+    function handleStart() {
 
         if (scope.activeShape) {
 
+            // Find shape control intersection
+
+            rayCaster.setFromCamera(start, scope.camera);
             let intersects = rayCaster.intersectObjects(scope.activeShape.shapeControls.map(function (shapeControl) {
                 return shapeControl.handle.background;
             }));
@@ -88,29 +86,65 @@ function ShapeControls(camera, domElement) {
 
         }
 
+    }
+
+    function onMouseDown(event) {
+
+        if (scope.enabled === false) return;
+
+        event.preventDefault();
+
+        start.set(
+            event.clientX / scope.domElement.offsetWidth * 2 - 1,
+            - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
+        );
+
+        end.copy(start); // Reset end position
+
+        // Shared start handler
+
+        handleStart();
+
         // Event listeners
 
         attachMouseMoveAndUpListeners();
 
     }
 
-    function onMouseMove(event) {
+    function onTouchStart(event) {
 
         if (scope.enabled === false) return;
 
         event.preventDefault();
 
-        end.set(
-            event.clientX / scope.domElement.offsetWidth * 2 - 1,
-            - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
-        );
+        if (event.touches.length === 1) {
+
+            start.set(
+                event.touches[0].clientX / scope.domElement.offsetWidth * 2 - 1,
+                - (event.touches[0].clientY / scope.domElement.offsetHeight * 2 - 1)
+            );
+
+            end.copy(start); // Reset end position
+
+            // Shared start handler
+
+            handleStart();
+
+            // Event listeners
+
+            attachTouchMoveAndEndListeners();
+
+        }
+
+    }
+
+    function handleMove() {
 
         if (activeShapeControl) {
 
             // Find intersections
 
             rayCaster.setFromCamera(end, scope.camera);
-
             let intersects = rayCaster.intersectObjects(activeShapeControl.ranges);
 
             if (intersects.length === 0) return;
@@ -138,15 +172,41 @@ function ShapeControls(camera, domElement) {
 
     }
 
-    function onMouseUp(event) {
+    function onMouseMove(event) {
 
         if (scope.enabled === false) return;
 
         event.preventDefault();
 
-        // Event listeners
+        end.set(
+            event.clientX / scope.domElement.offsetWidth * 2 - 1,
+            - (event.clientY / scope.domElement.offsetHeight * 2 - 1)
+        );
 
-        detachMouseMoveAndUpListeners();
+        // Shared move handler
+
+        handleMove();
+
+    }
+
+    function onTouchMove(event) {
+
+        if (scope.enabled === false) return;
+
+        event.preventDefault();
+
+        end.set(
+            event.touches[0].clientX / scope.domElement.offsetWidth * 2 - 1,
+            - (event.touches[0].clientY / scope.domElement.offsetHeight * 2 - 1)
+        );
+
+        // Shared move handler
+
+        handleMove();
+
+    }
+
+    function handleEnd() {
 
         if (activeShapeControl) {
 
@@ -168,10 +228,11 @@ function ShapeControls(camera, domElement) {
 
             activeShapeControl = null;
 
-        } else if (end.distanceToSquared(start) < EPSILON) {
+        } else if (end.distanceToSquared(start) < EPSILON) { // The circle is a little distorted with normalized screen space
 
             if (scope.shapes.length > 0) {
 
+                rayCaster.setFromCamera(end, scope.camera);
                 let intersects = rayCaster.intersectObjects(scope.shapes.map(function (shape) {
                     return shape.debugMesh0;
                 }));
@@ -193,13 +254,49 @@ function ShapeControls(camera, domElement) {
 
                 }
 
+                // TODO: Allow canceling selection
+
             }
 
         }
 
     }
 
+    function onMouseUp(event) {
+
+        if (scope.enabled === false) return;
+
+        event.preventDefault();
+
+        // Event listeners
+
+        detachMouseMoveAndUpListeners();
+
+        // Shared end handler
+
+        handleEnd();
+
+    }
+
+    function onTouchEnd(event) {
+
+        if (scope.enabled === false) return;
+
+        event.preventDefault();
+
+        // Event listeners
+
+        detachTouchMoveAndEndListeners();
+
+        // Shared end handler
+
+        handleEnd();
+
+    }
+
     scope.domElement.addEventListener("mousedown", onMouseDown);
+
+    scope.domElement.addEventListener("touchstart", onTouchStart);
 
 }
 
