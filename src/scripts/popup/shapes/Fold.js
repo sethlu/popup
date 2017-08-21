@@ -56,10 +56,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (point) {
                 this.a = Math.max(Math.round(point.y * 2) / 2, 0);
-                this.b = Math.round(point.x * 2) / 2;
-            }.bind(this),
-            undefined,
-            2
+            }.bind(this)
         ),
 
         // c & d
@@ -67,10 +64,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (point) {
                 this.c = Math.max(Math.round(point.y * 2) / 2, 0);
-                this.d = Math.round(point.x * 2) / 2;
-            }.bind(this),
-            undefined,
-            2
+            }.bind(this)
         ),
 
         // e & f
