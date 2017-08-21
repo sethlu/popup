@@ -244,17 +244,19 @@ function ShapeControls(camera, domElement) {
 
                     scope.activeShape = intersect.object.parent;
 
-                    for (let shape of scope.shapes) {
-                        for (let shapeControl of shape.shapeControls) {
-                            shapeControl.visible = shape === scope.activeShape;
-                        }
-                    }
+                } else {
 
-                    scope.update(true); // Force update control handles
+                    scope.activeShape = null;
 
                 }
 
-                // TODO: Allow canceling selection
+                for (let shape of scope.shapes) {
+                    for (let shapeControl of shape.shapeControls) {
+                        shapeControl.visible = shape === scope.activeShape;
+                    }
+                }
+
+                scope.update(true); // Force update control handles
 
             }
 
