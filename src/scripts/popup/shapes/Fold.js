@@ -73,7 +73,10 @@ function Fold(origin, a, b, c, d, e, f, g) {
                 [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
                 function (point) {
                     this.e = Math.max(Math.round(point.y * 2) / 2, 0);
-                }.bind(this)
+                    this.f = Math.round(point.x * 2) / 2;
+                }.bind(this),
+                undefined,
+                2
             );
 
             let rotationMatrix = new THREE.Matrix4();
@@ -93,7 +96,10 @@ function Fold(origin, a, b, c, d, e, f, g) {
             let shapeControl = new ShapeControl(
                 [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
                 function (point) {
-                    this.g = Math.round(Math.atan2(point.y - this.e, point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI);
+                    this.g = THREE.Math.clamp(
+                        Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI),
+                        0 + EPSILON,
+                        Math.PI - EPSILON);
                 }.bind(this),
                 undefined,
                 2
@@ -240,13 +246,17 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         let interpolation = Fold.interpolate(a, b, c, d, e, f, g, angle);
 
-        this.applyInterpolation(interpolation);
+        if (!interpolation) return;
 
-        // Debug
+        // Gullies
+
+        this.applyInterpolation(interpolation);
 
         this.gullies[0].updateMatrix();
         this.gullies[2].updateMatrix();
         this.gullies[4].updateMatrix();
+
+        // Debug
 
         this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
         this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
@@ -281,7 +291,7 @@ Object.assign(Fold, {
 
         // Case folds
 
-        if (!isAlmostInfinite(p0.y)) {
+        if (Math.abs(p0.y) < 1e3) {
 
             // V-fold
 
@@ -340,7 +350,7 @@ Object.assign(Fold, {
 
             // Calling interpolation
 
-            return ParallelFold.interpolate(a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3), angle);
+            return ParallelFold.interpolate(a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3), angle, shapeDirection);
 
         }
 
@@ -355,10 +365,6 @@ function solveWithNewtonRaphsonMethod(func, x = 0, epsilon = EPSILON, delta = EP
         ++i;
     }
     return x;
-}
-
-function isAlmostInfinite(num) {
-    return Math.abs(num) > Number.MAX_SAFE_INTEGER / 2;
 }
 
 export {Fold};
