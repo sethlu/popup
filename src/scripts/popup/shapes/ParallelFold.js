@@ -113,7 +113,7 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
 
 Object.assign(ParallelFold, {
 
-    interpolate: function (a, b, c, d, angle) {
+    interpolate: function (a, b, c, d, angle, shapeDirection = true) {
 
         // Constraints
 
@@ -144,6 +144,8 @@ Object.assign(ParallelFold, {
         // Gullies
 
         let gullyDirection = shapeForward;
+
+        if (!shapeDirection) gullyDirection = gullyDirection.clone().multiply(new THREE.Vector3(1, -1, 1));
 
         let gullies = [
             [
