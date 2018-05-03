@@ -65,7 +65,7 @@ window.addEventListener("load", function () {
     scene.add(new THREE.AmbientLight(0xcccccc));
 
     // Spot light
-    let spotLight = new THREE.SpotLight(0xffffff, 1, 50, Math.PI / 4);
+    let spotLight = new THREE.SpotLight(0xffffff, 0.5, 30, Math.PI / 4);
     spotLight.position.set(-1, -1, 20);
     spotLight.target.position.set(0, 0, 0);
     scene.add(spotLight);
