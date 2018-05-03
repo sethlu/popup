@@ -108,7 +108,8 @@ function Fold(origin, a, b, c, d, e, f, g) {
                     this.g = Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI);
                 }.bind(this),
                 undefined,
-                2
+                2,
+                false
             );
 
             let rotationMatrix = new THREE.Matrix4();

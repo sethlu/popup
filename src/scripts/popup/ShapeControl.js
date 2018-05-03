@@ -9,7 +9,7 @@ let arrowTexture = textureLoader.load("images/shapecontrol_line_arrows.png");
 const BACKGROUND_OPACITY = 0.8;
 const ARROW_OPACITY = 1;
 
-function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 1) {
+function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 1, grid = true) {
 
     THREE.Group.call(this);
 
@@ -44,11 +44,15 @@ function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 
 
     // Control grid
 
-    let gridMaterial = new THREE.MeshBasicMaterial({color: 0xdddddd, side: THREE.DoubleSide});
+    if (grid) {
 
-    let grid = new THREE.Mesh(undefined, gridMaterial);
-    this.grid = grid;
-    this.add(grid);
+        let gridMaterial = new THREE.MeshBasicMaterial({color: 0xdddddd, side: THREE.DoubleSide});
+
+        let grid = new THREE.Mesh(undefined, gridMaterial);
+        this.grid = grid;
+        this.add(grid);
+
+    }
 
     // Control ranges
 
@@ -91,7 +95,7 @@ ShapeControl.prototype = Object.assign(Object.create(THREE.Group.prototype), {
 
         return function (major = 1, divisions = 2) {
 
-            if (!isUpdated(this.handle)) return;
+            if (!this.grid || !isUpdated(this.handle)) return;
 
             let x = this.handle.position.x,
                 y = this.handle.position.y;
