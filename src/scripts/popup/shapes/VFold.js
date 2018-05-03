@@ -218,7 +218,7 @@ Object.assign(VFold, {
             [n2, shapeForward, v3, false]
         ].map(function (_) {
 
-            let [gullyDirection, rightNeighborDirection, leftNeighborDirection, useSupplementaryAngle] = _;
+            let [gullyDirection, rightNeighborDirection, leftNeighborDirection, useExplementaryAngle] = _;
 
             let rightNeighborToGully = rightNeighborDirection.clone()
                 .add(gullyDirection.clone().multiplyScalar(- Math.cos(gullyDirection.angleTo(rightNeighborDirection))))
@@ -228,7 +228,7 @@ Object.assign(VFold, {
                 .normalize();
 
             let gullyAngle = rightNeighborToGully.angleTo(leftNeighborToGully);
-            if (useSupplementaryAngle) gullyAngle = 2 * Math.PI - gullyAngle;
+            if (useExplementaryAngle) gullyAngle = 2 * Math.PI - gullyAngle;
 
             let gullyRight = gullyDirection.clone()
                 .cross(

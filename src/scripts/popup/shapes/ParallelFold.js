@@ -186,9 +186,9 @@ Object.assign(ParallelFold, {
             ]
         ].map(function (_) {
 
-            let [gullyPosition, gullyUp, gullyAngle, useSupplementaryAngle] = _;
+            let [gullyPosition, gullyUp, gullyAngle, useExplementaryAngle] = _;
 
-            if (useSupplementaryAngle) gullyAngle = 2 * Math.PI - gullyAngle;
+            if (useExplementaryAngle) gullyAngle = 2 * Math.PI - gullyAngle;
 
             let gullyRight = gullyDirection.clone().cross(gullyUp).normalize();
 
