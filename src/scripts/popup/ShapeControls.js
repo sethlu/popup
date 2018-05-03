@@ -233,16 +233,17 @@ function ShapeControls(camera, domElement) {
             if (scope.shapes.length > 0) {
 
                 rayCaster.setFromCamera(end, scope.camera);
-                let intersects = rayCaster.intersectObjects(scope.shapes.map(function (shape) {
-                    return shape.debugMesh0;
-                }));
+                let intersects = rayCaster.intersectObjects(
+                    flattenArray(scope.shapes.map(function (shape) {
+                        return shape.planes.map(function (plane) { return plane.children; });
+                    })));
 
                 if (intersects.length > 0) {
                     // Found available shape for manipulation
 
                     let intersect = intersects[0];
 
-                    scope.activeShape = intersect.object.parent;
+                    scope.activeShape = intersect.object.parent.parent;
 
                 } else {
 
@@ -368,5 +369,13 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
     }()
 
 });
+
+function flattenArray(a) {
+    if (!Array.isArray(a)) return [a];
+    return a.reduce(function (a, v) {
+        Array.prototype.push.apply(a, flattenArray(v));
+        return a;
+    }, []);
+}
 
 export {ShapeControls};

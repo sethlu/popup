@@ -6,10 +6,11 @@ import {Gully} from "../Gully.js";
 import {ParallelFold} from "./ParallelFold.js";
 import {VFold} from "./VFold.js";
 import {ShapeControl} from "../ShapeControl.js";
+import {ShapePlane} from "./ShapePlane.js";
 
 let transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
-let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
+// let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
 // TODO: Warn suitable gullies to place additional shapes
 
@@ -37,6 +38,14 @@ function Fold(origin, a, b, c, d, e, f, g) {
         new Gully()
     ];
     this.add.apply(this, this.gullies);
+
+    // Shape faces
+
+    this.planes = [
+        new ShapePlane(),
+        new ShapePlane()
+    ];
+    this.add.apply(this, this.planes);
 
     // Controls
 
@@ -98,8 +107,8 @@ function Fold(origin, a, b, c, d, e, f, g) {
                 function (point) {
                     this.g = THREE.Math.clamp(
                         Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI),
-                        0 + EPSILON,
-                        Math.PI - EPSILON);
+                        0,
+                        Math.PI);
                 }.bind(this),
                 undefined,
                 2
@@ -124,10 +133,10 @@ function Fold(origin, a, b, c, d, e, f, g) {
 
     // this.gullies[1].debugLine0.material = this.gullies[3].debugLine0.material = this.gullies[5].debugLine0.material = new THREE.LineBasicMaterial({color: 0x00cc00});
 
-    this.debugMesh0 = new THREE.Mesh(new THREE.Geometry(), debugMeshMaterial);
-    this.debugMesh0.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
-    this.debugMesh0.geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(1, 2, 3), new THREE.Face3(2, 3, 4), new THREE.Face3(3, 4, 5));
-    this.add(this.debugMesh0);
+    // this.debugMesh0 = new THREE.Mesh(new THREE.Geometry(), debugMeshMaterial);
+    // this.debugMesh0.geometry.vertices.push(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
+    // this.debugMesh0.geometry.faces.push(new THREE.Face3(0, 1, 2), new THREE.Face3(1, 2, 3), new THREE.Face3(2, 3, 4), new THREE.Face3(3, 4, 5));
+    // this.add(this.debugMesh0);
 
 }
 
@@ -252,21 +261,65 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         this.applyInterpolation(interpolation);
 
-        this.gullies[0].updateMatrix();
-        this.gullies[2].updateMatrix();
-        this.gullies[4].updateMatrix();
+        // Planes
+
+        let planeRotationMatrix = new THREE.Matrix4();
+
+        {
+            let v1 = interpolation.gullies[0].gullyDirection;
+            let v2 = interpolation.gullies[2].gullyPosition.clone()
+                .add(interpolation.gullies[2].gullyDirection)
+                .sub(interpolation.gullies[0].gullyPosition);
+
+            let planeX = v1;
+            let planeY = v2.clone().sub(v1.clone().multiplyScalar(v2.dot(v1))).normalize();
+            let planeZ = planeX.clone().cross(planeY);
+
+            planeRotationMatrix.elements = [
+                planeX.x, planeX.y, planeX.z, 0,
+                planeY.x, planeY.y, planeY.z, 0,
+                planeZ.x, planeZ.y, planeZ.z, 0,
+                0, 0, 0, 1
+            ];
+
+            this.planes[0].position.copy(new THREE.Vector3(0, this.gullies[0].shapeOrigin, 0).applyMatrix4(this.gullies[0].matrix));
+            this.planes[0].setRotationFromMatrix(planeRotationMatrix);
+            this.planes[0].updateMatrix();
+        }
+
+        {
+            let v1 = interpolation.gullies[4].gullyDirection;
+            let v2 = interpolation.gullies[2].gullyPosition.clone()
+                .add(interpolation.gullies[2].gullyDirection)
+                .sub(interpolation.gullies[4].gullyPosition);
+
+            let planeX = v1.clone().multiplyScalar(-1);
+            let planeY = v2.clone().sub(v1.clone().multiplyScalar(v2.dot(v1))).normalize();
+            let planeZ = planeX.clone().cross(planeY);
+
+            planeRotationMatrix.elements = [
+                planeX.x, planeX.y, planeX.z, 0,
+                planeY.x, planeY.y, planeY.z, 0,
+                planeZ.x, planeZ.y, planeZ.z, 0,
+                0, 0, 0, 1
+            ];
+
+            this.planes[1].position.copy(new THREE.Vector3(0, this.gullies[4].shapeOrigin, 0).applyMatrix4(this.gullies[4].matrix));
+            this.planes[1].setRotationFromMatrix(planeRotationMatrix);
+            this.planes[1].updateMatrix();
+        }
 
         // Debug
 
-        this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
-        this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
-        this.debugMesh0.geometry.vertices[2].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[2].matrix));
-        this.debugMesh0.geometry.vertices[3].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[2].matrix));
-        this.debugMesh0.geometry.vertices[4].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[4].matrix));
-        this.debugMesh0.geometry.vertices[5].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[4].matrix));
-        this.debugMesh0.geometry.computeFaceNormals();
-        this.debugMesh0.geometry.verticesNeedUpdate = true;
-        this.debugMesh0.geometry.normalsNeedUpdate = true;
+        // this.debugMesh0.geometry.vertices[0].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[0].matrix));
+        // this.debugMesh0.geometry.vertices[1].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[0].matrix));
+        // this.debugMesh0.geometry.vertices[2].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[2].matrix));
+        // this.debugMesh0.geometry.vertices[3].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[2].matrix));
+        // this.debugMesh0.geometry.vertices[4].copy(new THREE.Vector3(0, 2, 0).applyMatrix4(this.gullies[4].matrix));
+        // this.debugMesh0.geometry.vertices[5].copy(new THREE.Vector3(0, 0, 0).applyMatrix4(this.gullies[4].matrix));
+        // this.debugMesh0.geometry.computeFaceNormals();
+        // this.debugMesh0.geometry.verticesNeedUpdate = true;
+        // this.debugMesh0.geometry.normalsNeedUpdate = true;
 
     }
 
@@ -350,7 +403,10 @@ Object.assign(Fold, {
 
             // Calling interpolation
 
-            return ParallelFold.interpolate(a, c, new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3), angle, shapeDirection);
+            return ParallelFold.interpolate(
+                a, c,
+                new THREE.Vector3(-a).distanceTo(p3), new THREE.Vector3(c).distanceTo(p3),
+                angle, shapeDirection);
 
         }
 

@@ -36,6 +36,8 @@ Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
             ];
             gully.setRotationFromMatrix(gullyRotationMatrix);
 
+            gully.updateMatrix();
+
             gully.shapeOrigin = shapeOrigin || 0;
 
             gully.interpolate(gullyAngle);
