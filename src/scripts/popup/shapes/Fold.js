@@ -105,10 +105,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
             let shapeControl = new ShapeControl(
                 [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
                 function (point) {
-                    this.g = THREE.Math.clamp(
-                        Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI),
-                        0,
-                        Math.PI);
+                    this.g = Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI);
                 }.bind(this),
                 undefined,
                 2
