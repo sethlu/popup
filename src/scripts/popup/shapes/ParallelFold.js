@@ -144,8 +144,7 @@ Object.assign(ParallelFold, {
         // Gullies
 
         let gullyDirection = shapeForward;
-
-        if (!shapeDirection) gullyDirection = gullyDirection.clone().multiply(new THREE.Vector3(1, -1, 1));
+        if (!shapeDirection) gullyDirection = gullyDirection.clone().multiplyScalar(-1);
 
         let gullies = [
             [
@@ -203,7 +202,9 @@ Object.assign(ParallelFold, {
         }, this);
 
         return {
-            gullies,
+            gullies: shapeDirection
+                ? gullies
+                : [gullies[1], gullies[0], gullies[3], gullies[2], gullies[5], gullies[4]],
 
             // Debug use
             p1, p2, p3
