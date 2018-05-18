@@ -1,13 +1,11 @@
 
 const browserify = require('browserify');
 const babelify = require('babelify');
+const tsify = require('tsify');
 const gulp = require("gulp");
 const compass = require("gulp-compass");
-const concat = require("gulp-concat");
 const sourcemaps = require("gulp-sourcemaps");
-const rename = require("gulp-rename");
 const uglify = require("gulp-uglify");
-const babel = require("gulp-babel");
 const autoprefixer = require("gulp-autoprefixer");
 const browserSync = require("browser-sync").create();
 const source = require("vinyl-source-stream");
@@ -15,7 +13,7 @@ const buffer = require("vinyl-buffer");
 
 // Styles
 
-gulp.task("compass", function() {
+gulp.task("compass", function () {
     return gulp.src("./src/styles/*.scss")
         .pipe(compass({
             css: "./tmp/styles",
@@ -39,8 +37,9 @@ gulp.task("styles-watch", ["styles"], function () {
 // Scripts
 
 gulp.task("scripts", function () {
-    return browserify("./src/scripts/app.js", {debug: true})
-        .transform(babelify.configure({presets: ["es2015"]}))
+    return browserify("./src/scripts/app.ts", {debug: true})
+        .plugin("tsify")
+        .transform(babelify.configure({extensions: [".ts", ".js"], presets: ["es2015"]}))
         .bundle()
         .on("error", function (err) {
             console.error(err);
@@ -65,7 +64,7 @@ gulp.task("build", ["styles", "scripts"]);
 gulp.task("server", ["build"], function () {
     browserSync.init({
         server: {
-          baseDir: "./app"
+            baseDir: "./app"
         },
         ghostMode: false
     });

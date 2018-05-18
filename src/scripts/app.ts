@@ -1,10 +1,10 @@
 
 import * as THREE from "three";
-import * as DAT from "dat.gui/build/dat.gui.min.js";
-import OrbitControls from "three-orbitcontrols";
-import Stats from "stats.js";
-import TWEEN from "tween.js";
-import {Base, Fold, VFold, ParallelFold, ShapeControls} from "./popup/popup.js"
+import * as DAT from "dat.gui";
+import * as OrbitControls from "three-orbitcontrols";
+import * as Stats from "stats.js";
+import * as TWEEN from "@tweenjs/tween.js";
+import {Base, Fold, ShapeControls} from "./popup/popup"
 
 // Model
 
@@ -78,7 +78,7 @@ window.addEventListener("load", function () {
 
     // Variables
 
-    let vars = {
+    let vars: any = {
         angle: 180
     };
     let gui = new DAT.GUI();
@@ -99,7 +99,7 @@ window.addEventListener("load", function () {
 
     // Render loop
 
-    (function render(time) {
+    (function render(time?: number) {
 
         stats.begin();
 

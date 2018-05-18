@@ -1,6 +1,6 @@
 
 import * as THREE from "three";
-import TWEEN from "tween.js";
+import TWEEN from "@tweenjs/tween.js";
 import {BACKGROUND_OPACITY, ARROW_OPACITY} from "./ShapeControl.js";
 import {EPSILON} from "./consts";
 

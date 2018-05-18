@@ -39,7 +39,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
     ];
     this.add.apply(this, this.gullies);
 
-    // Shape faces
+    // Shape planes
 
     this.planes = [
         new ShapePlane(),
