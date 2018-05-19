@@ -1,8 +1,22 @@
 
 import * as THREE from "three";
-import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
-import {Shape} from "./Shape.js";
-import {Gully} from "../Gully.js";
+import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts";
+import {
+    Shape,
+    GULLY_0,
+    GULLY_0_SUPPLEMENTARY,
+    GULLY_0_OPPOSITE,
+    GULLY_0_SUPPLEMENTARY_OPPOSITE,
+    GULLY_1,
+    GULLY_1_SUPPLEMENTARY,
+    GULLY_1_OPPOSITE,
+    GULLY_1_SUPPLEMENTARY_OPPOSITE,
+    GULLY_2,
+    GULLY_2_SUPPLEMENTARY,
+    GULLY_2_OPPOSITE,
+    GULLY_2_SUPPLEMENTARY_OPPOSITE
+} from "./Shape";
+import {Gully} from "../Gully";
 
 let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcccc00, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
@@ -18,15 +32,22 @@ function ParallelFold(origin, a, b, c, d) {
 
     // Gullies
 
-    this.gullies = [
-        new Gully(),
-        new Gully(),
-        new Gully(),
-        new Gully(),
-        new Gully(),
-        new Gully()
-    ];
-    this.add.apply(this, this.gullies);
+    this.gullies = {};
+
+    this.gullies[GULLY_0] = new Gully();
+    this.gullies[GULLY_0_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_0_OPPOSITE] = new Gully();
+    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE] = new Gully();
+    this.gullies[GULLY_1] = new Gully();
+    this.gullies[GULLY_1_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_1_OPPOSITE] = new Gully();
+    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE] = new Gully();
+    this.gullies[GULLY_2] = new Gully();
+    this.gullies[GULLY_2_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_2_OPPOSITE] = new Gully();
+    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE] = new Gully();
+
+    this.add.apply(this, Object.values(this.gullies));
 
     // Debug
 
@@ -69,9 +90,9 @@ ParallelFold.prototype = Object.assign(Object.create(Shape.prototype), {
             && angle === this._angle) {
 
             // Interpolate for each gully
-            for (let gully of this.gullies) {
+            Object.values(this.gullies).forEach(function (gully) {
                 gully.interpolate();
-            }
+            });
 
             return;
 

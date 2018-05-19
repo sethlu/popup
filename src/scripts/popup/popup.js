@@ -1,6 +1,6 @@
 
-export * from "./Gully.js";
-export * from "./shapes/Shape.js";
-export * from "./shapes/Base.js";
-export * from "./shapes/Fold.js";
-export * from "./ShapeControls.js";
+export * from "./Gully";
+export * from "./shapes/Shape";
+export * from "./shapes/Base";
+export * from "./shapes/Fold";
+export * from "./ShapeControls";

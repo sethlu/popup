@@ -1,7 +1,10 @@
 
 import * as THREE from "three";
-import {Shape} from "./Shape.js";
-import {Gully} from "../Gully.js";
+import {
+    Shape,
+    GULLY_0
+} from "./Shape";
+import {Gully} from "../Gully";
 
 let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
@@ -18,10 +21,11 @@ function Base() {
 
     // Gullies
 
-    this.gullies = [
-        new Gully()
-    ];
-    this.add.apply(this, this.gullies);
+    this.gullies = {};
+    
+    this.gullies[GULLY_0] = new Gully();
+
+    this.add.apply(this, Object.values(this.gullies));
 
     // Debug
 
@@ -54,9 +58,9 @@ Base.prototype = Object.assign(Object.create(Shape.prototype), {
             && angle === this._angle) {
 
             // Interpolate for each gully
-            for (let gully of this.gullies) {
+            Object.values(this.gullies).forEach(function (gully) {
                 gully.interpolate();
-            }
+            });
 
             return;
 
