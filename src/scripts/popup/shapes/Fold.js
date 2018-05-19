@@ -1,6 +1,6 @@
 
 import * as THREE from "three";
-import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
+import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp, VEC3_RIGHT as shapeRight} from "../consts.js";
 import {Shape} from "./Shape.js";
 import {Gully} from "../Gully.js";
 import {ParallelFold} from "./ParallelFold.js";
@@ -8,9 +8,11 @@ import {VFold} from "./VFold.js";
 import {ShapeControl} from "../ShapeControl.js";
 import {ShapePlane} from "./ShapePlane.js";
 
-let transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
+const transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
-// let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
+// const debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
+
+const adaptiveShapeControlGrid = false;
 
 // TODO: Warn suitable gullies to place additional shapes
 
@@ -55,7 +57,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (point) {
-                this.origin = Math.round((point.y - (this.parent ? this.parent.shapeOrigin : 0)) * 2) / 2;
+                this.origin = Math.round((point.y - (this.parent ? this.parent.shapeOrigin : 0)) * 4) / 4;
             }.bind(this),
             "gully"
         ),
@@ -64,7 +66,7 @@ function Fold(origin, a, b, c, d, e, f, g) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (point) {
-                this.a = Math.max(Math.round(point.y * 2) / 2, 0);
+                this.a = Math.max(Math.round(point.y * 4) / 4, 0);
             }.bind(this)
         ),
 
@@ -72,57 +74,31 @@ function Fold(origin, a, b, c, d, e, f, g) {
         new ShapeControl(
             [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
             function (point) {
-                this.c = Math.max(Math.round(point.y * 2) / 2, 0);
+                this.c = Math.max(Math.round(point.y * 4) / 4, 0);
             }.bind(this)
         ),
 
         // e & f
-        function () {
-            let shapeControl = new ShapeControl(
-                [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-                function (point) {
-                    this.e = Math.max(Math.round(point.y * 2) / 2, 0);
-                    this.f = Math.round(point.x * 2) / 2;
-                }.bind(this),
-                undefined,
-                2
-            );
-
-            let rotationMatrix = new THREE.Matrix4();
-            rotationMatrix.elements = [
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                1, 0, 0, 0,
-                0, 0, 0, 1
-            ];
-            shapeControl.setRotationFromMatrix(rotationMatrix);
-
-            return shapeControl;
-        }.bind(this)(),
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (point) {
+                this.e = Math.max(Math.round(point.y * 4) / 4, 0);
+                this.f = Math.round(point.x * 4) / 4;
+            }.bind(this),
+            undefined,
+            2
+        ),
 
         // g
-        function () {
-            let shapeControl = new ShapeControl(
-                [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
-                function (point) {
-                    this.g = Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (36 / Math.PI)) / (36 / Math.PI);
-                }.bind(this),
-                undefined,
-                2,
-                false
-            );
-
-            let rotationMatrix = new THREE.Matrix4();
-            rotationMatrix.elements = [
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                1, 0, 0, 0,
-                0, 0, 0, 1
-            ];
-            shapeControl.setRotationFromMatrix(rotationMatrix);
-
-            return shapeControl;
-        }.bind(this)()
+        new ShapeControl(
+            [new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), transparentMaterial)],
+            function (point) {
+                this.g = Math.round(Math.atan2(Math.max(0, point.y - this.e), point.x - this.f) * (360 / Math.PI)) / (360 / Math.PI);
+            }.bind(this),
+            undefined,
+            2,
+            false
+        )
 
     ];
     this.add.apply(this, this.shapeControls);
@@ -188,6 +164,12 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         this._g = g;
         this._angle = angle;
 
+        // Interpolation
+
+        let interpolation = Fold.interpolate(a, b, c, d, e, f, g, angle);
+
+        if (!interpolation) return;
+
         // Shape controls
 
         let c1 = shapeUp.clone()
@@ -200,6 +182,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let shapeControl = this.shapeControls[1];
 
             shapeControl.handle.position.set(b, a, 0);
+            shapeControl.updateGrid();
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
@@ -209,8 +192,6 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0, 0, 0, 1
             ];
             shapeControl.setRotationFromMatrix(rotationMatrix);
-
-            shapeControl.updateGrid();
         }
 
         // c & d
@@ -218,6 +199,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let shapeControl = this.shapeControls[2];
 
             shapeControl.handle.position.set(d, c, 0);
+            shapeControl.updateGrid();
 
             let rotationMatrix = new THREE.Matrix4();
             rotationMatrix.elements = [
@@ -227,8 +209,6 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0, 0, 0, 1
             ];
             shapeControl.setRotationFromMatrix(rotationMatrix);
-
-            shapeControl.updateGrid();
         }
 
         // e & f
@@ -236,7 +216,6 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let shapeControl = this.shapeControls[3];
 
             shapeControl.handle.position.set(f, e, 0);
-
             shapeControl.updateGrid();
         }
 
@@ -245,15 +224,34 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let shapeControl = this.shapeControls[4];
 
             shapeControl.handle.position.set(f + Math.cos(g) * 0.5, e + Math.sin(g) * 0.5, 0);
-
             shapeControl.updateGrid();
         }
 
-        // Interpolation
+        // e & f & g
+        {
+            let gridX = shapeForward;
+            let gridZ = adaptiveShapeControlGrid
+                ? shapeForward.clone().cross(
+                    interpolation.gullies[2].gullyPosition.clone()
+                        .add(interpolation.gullies[2].gullyDirection)).normalize()
+                : shapeRight;
+            let gridY = gridZ.clone().cross(gridX);
 
-        let interpolation = Fold.interpolate(a, b, c, d, e, f, g, angle);
+            let rotationMatrix = new THREE.Matrix4();
+            rotationMatrix.elements = [
+                gridX.x, gridX.y, gridX.z, 0,
+                gridY.x, gridY.y, gridY.z, 0,
+                gridZ.x, gridZ.y, gridZ.z, 0,
+                0, 0, 0, 1
+            ];
 
-        if (!interpolation) return;
+            [
+                this.shapeControls[3],
+                this.shapeControls[4]
+            ].forEach(function (shapeControl) {
+                shapeControl.setRotationFromMatrix(rotationMatrix);
+            });
+        }
 
         // Gullies
 
@@ -369,6 +367,8 @@ Object.assign(Fold, {
 
             va = v2.angleTo(v3);
             vb = v1.angleTo(v3);
+
+            if (isNaN(va), isNaN(vb)) return;
 
             // Calling interpolation
 
