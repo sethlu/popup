@@ -211,7 +211,7 @@ function ShapeControls(camera, domElement) {
 
         if (activeShapeControl) {
 
-            scope.dispatchEvent(Object.assign(endEvent, {
+            scope.dispatchEvent(Object.assign(Object.create(endEvent), {
                 shape: scope.activeShape
             }));
 
@@ -264,7 +264,7 @@ function ShapeControls(camera, domElement) {
 
             }
 
-            scope.dispatchEvent(Object.assign(selectEvent, {
+            scope.dispatchEvent(Object.assign(Object.create(selectEvent), {
                 shape: scope.activeShape
             }));
 
