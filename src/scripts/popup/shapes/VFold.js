@@ -199,7 +199,7 @@ Object.assign(VFold, {
         let distanceToLinePoint = linePoint.length();
         let angleBetweenLineDirectionAndOrigin = lineDirection.angleTo(linePoint.clone().negate());
         let perpendicularDistanceToLine = distanceToLinePoint * Math.sin(angleBetweenLineDirectionAndOrigin);
-        let vectorDistanceToLineFoot = Math.sqrt(vectorDistanceSquared - Math.pow(perpendicularDistanceToLine, 2));
+        let vectorDistanceToLineFoot = Math.sqrt(Math.max(0, vectorDistanceSquared - Math.pow(perpendicularDistanceToLine, 2)));
         let vectorDistanceToLinePoint =
             distanceToLinePoint * Math.cos(angleBetweenLineDirectionAndOrigin)
             + vectorDistanceToLineFoot * (shapeDirection ? 1 : -1);
