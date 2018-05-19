@@ -19,6 +19,7 @@ function ShapeControls(camera, domElement) {
 
     let startEvent = {type: "start"};
     let endEvent = {type: "end"};
+    let selectEvent = {type: "select"};
 
     let start = new THREE.Vector2();
     let end = new THREE.Vector2();
@@ -210,7 +211,9 @@ function ShapeControls(camera, domElement) {
 
         if (activeShapeControl) {
 
-            scope.dispatchEvent(endEvent);
+            scope.dispatchEvent(Object.assign(endEvent, {
+                shape: scope.activeShape
+            }));
 
             scope.activeShape.shapeControls.map(function (shapeControl) {
                 let handle = shapeControl.handle;
@@ -260,6 +263,10 @@ function ShapeControls(camera, domElement) {
                 scope.update(true); // Force update control handles
 
             }
+
+            scope.dispatchEvent(Object.assign(selectEvent, {
+                shape: scope.activeShape
+            }));
 
         }
 

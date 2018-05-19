@@ -1,10 +1,9 @@
-
 import * as THREE from "three";
 import * as DAT from "dat.gui";
 import * as OrbitControls from "three-orbitcontrols";
 import * as Stats from "stats.js";
 import * as TWEEN from "@tweenjs/tween.js";
-import {Base, Fold, ShapeControls} from "./popup/popup"
+import {Base, Fold, Shape, ShapeControls} from "./popup/popup"
 
 // Model
 
@@ -89,13 +88,28 @@ window.addEventListener("load", function () {
     let shapeControls = new ShapeControls(camera, renderer.domElement);
     shapeControls.shapes = [fold, fold2];
 
-    shapeControls.addEventListener("start", function () {
-       orbitControls.enabled = false;
-    });
+    (function () {
 
-    shapeControls.addEventListener("end", function () {
-        orbitControls.enabled = true;
-    });
+        function updateTarget(shape?: Shape) {
+            orbitControls.target.copy((shape || base).getWorldPosition(new THREE.Vector3()));
+            orbitControls.update();
+        }
+
+        shapeControls.addEventListener("select", function (event: any) {
+            updateTarget(event.shape);
+        });
+
+        shapeControls.addEventListener("start", function () {
+            orbitControls.enabled = false;
+        });
+
+        shapeControls.addEventListener("end", function (event: any) {
+            orbitControls.enabled = true;
+
+            updateTarget(event.shape);
+        });
+
+    })();
 
     // Render loop
 
