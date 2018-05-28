@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp, VEC3_RIGHT as shapeRight} from "../consts";
 import {
@@ -21,12 +20,11 @@ import {ParallelFold} from "./ParallelFold";
 import {VFold} from "./VFold";
 import {ShapeControl} from "../ShapeControl";
 import {ShapePlane} from "./ShapePlane";
+import {FLAG_ADAPTIVE_SHAPE_CONTROL_GRID} from "../flags";
 
 const transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opacity: 0, side: THREE.DoubleSide});
 
 // const debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcc00cc, shading: THREE.SmoothShading, side: THREE.DoubleSide});
-
-const adaptiveShapeControlGrid = false;
 
 // TODO: Warn suitable gullies to place additional shapes
 
@@ -251,7 +249,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         // e & f & g
         {
             let gridX = shapeForward;
-            let gridZ = adaptiveShapeControlGrid
+            let gridZ = FLAG_ADAPTIVE_SHAPE_CONTROL_GRID
                 ? shapeForward.clone().cross(
                     interpolation.gullies[2].gullyPosition.clone()
                         .add(interpolation.gullies[2].gullyDirection)).normalize()

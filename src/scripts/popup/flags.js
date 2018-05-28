@@ -1,0 +1,1 @@
+export const FLAG_ADAPTIVE_SHAPE_CONTROL_GRID = false;
