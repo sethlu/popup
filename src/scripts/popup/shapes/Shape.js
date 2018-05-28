@@ -14,8 +14,8 @@ export const GULLY_2_SUPPLEMENTARY          = 0b0101;
 export const GULLY_2_OPPOSITE               = 0b1100;
 export const GULLY_2_SUPPLEMENTARY_OPPOSITE = 0b1101;
 
-const GULLY_SUPPLEMENTARY                   = 0b0001;
-const GULLY_OPPOSITE                        = 0b1000;
+export const GULLY_SUPPLEMENTARY                   = 0b0001;
+export const GULLY_OPPOSITE                        = 0b1000;
 
 export function Shape() {
 
