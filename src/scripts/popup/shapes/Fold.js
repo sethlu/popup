@@ -3,17 +3,29 @@ import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp, VEC3_RIGHT as
 import {
     Shape,
     GULLY_0,
+    GULLY_0_EXPLEMENTARY,
     GULLY_0_SUPPLEMENTARY,
+    GULLY_0_SUPPLEMENTARY_EXPLEMENTARY,
     GULLY_0_OPPOSITE,
+    GULLY_0_OPPOSITE_EXPLEMENTARY,
     GULLY_0_SUPPLEMENTARY_OPPOSITE,
+    GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY,
     GULLY_1,
+    GULLY_1_EXPLEMENTARY,
     GULLY_1_SUPPLEMENTARY,
+    GULLY_1_SUPPLEMENTARY_EXPLEMENTARY,
     GULLY_1_OPPOSITE,
+    GULLY_1_OPPOSITE_EXPLEMENTARY,
     GULLY_1_SUPPLEMENTARY_OPPOSITE,
+    GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY,
     GULLY_2,
+    GULLY_2_EXPLEMENTARY,
     GULLY_2_SUPPLEMENTARY,
+    GULLY_2_SUPPLEMENTARY_EXPLEMENTARY,
     GULLY_2_OPPOSITE,
-    GULLY_2_SUPPLEMENTARY_OPPOSITE
+    GULLY_2_OPPOSITE_EXPLEMENTARY,
+    GULLY_2_SUPPLEMENTARY_OPPOSITE,
+    GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY
 } from "./Shape";
 import {Gully} from "../Gully";
 import {ParallelFold} from "./ParallelFold";
@@ -46,17 +58,29 @@ function Fold(origin, a, b, c, d, e, f, g) {
     this.gullies = {};
 
     this.gullies[GULLY_0] = new Gully();
+    this.gullies[GULLY_0_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_0_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_0_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_0_OPPOSITE] = new Gully();
+    this.gullies[GULLY_0_OPPOSITE_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE] = new Gully();
+    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_1] = new Gully();
+    this.gullies[GULLY_1_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_1_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_1_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_1_OPPOSITE] = new Gully();
+    this.gullies[GULLY_1_OPPOSITE_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE] = new Gully();
+    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_2] = new Gully();
+    this.gullies[GULLY_2_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_2_SUPPLEMENTARY] = new Gully();
+    this.gullies[GULLY_2_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_2_OPPOSITE] = new Gully();
+    this.gullies[GULLY_2_OPPOSITE_EXPLEMENTARY] = new Gully();
     this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE] = new Gully();
+    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
 
     this.add.apply(this, Object.values(this.gullies));
 
@@ -251,8 +275,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
             let gridX = shapeForward;
             let gridZ = FLAG_ADAPTIVE_SHAPE_CONTROL_GRID
                 ? shapeForward.clone().cross(
-                    interpolation.gullies[2].gullyPosition.clone()
-                        .add(interpolation.gullies[2].gullyDirection)).normalize()
+                    interpolation.gullies[1].gullyPosition.clone()
+                        .add(interpolation.gullies[1].gullyDirection)).normalize()
                 : shapeRight;
             let gridY = gridZ.clone().cross(gridX);
 
@@ -282,8 +306,8 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
 
         {
             let v1 = interpolation.gullies[0].gullyDirection;
-            let v2 = interpolation.gullies[2].gullyPosition.clone()
-                .add(interpolation.gullies[2].gullyDirection)
+            let v2 = interpolation.gullies[1].gullyPosition.clone()
+                .add(interpolation.gullies[1].gullyDirection)
                 .sub(interpolation.gullies[0].gullyPosition);
 
             let planeX = v1;
@@ -303,10 +327,10 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
         }
 
         {
-            let v1 = interpolation.gullies[4].gullyDirection;
-            let v2 = interpolation.gullies[2].gullyPosition.clone()
-                .add(interpolation.gullies[2].gullyDirection)
-                .sub(interpolation.gullies[4].gullyPosition);
+            let v1 = interpolation.gullies[2].gullyDirection;
+            let v2 = interpolation.gullies[1].gullyPosition.clone()
+                .add(interpolation.gullies[1].gullyDirection)
+                .sub(interpolation.gullies[2].gullyPosition);
 
             let planeX = v1.clone().multiplyScalar(-1);
             let planeY = v2.clone().sub(v1.clone().multiplyScalar(v2.dot(v1))).normalize();
@@ -319,7 +343,7 @@ Fold.prototype = Object.assign(Object.create(Shape.prototype), {
                 0, 0, 0, 1
             ];
 
-            this.planes[1].position.copy(new THREE.Vector3(0, this.gullies[4].shapeOrigin, 0).applyMatrix4(this.gullies[4].matrix));
+            this.planes[1].position.copy(new THREE.Vector3(0, this.gullies[2].shapeOrigin, 0).applyMatrix4(this.gullies[2].matrix));
             this.planes[1].setRotationFromMatrix(planeRotationMatrix);
             this.planes[1].updateMatrix();
         }

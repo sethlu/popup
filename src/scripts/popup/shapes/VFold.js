@@ -231,15 +231,12 @@ Object.assign(VFold, {
         let gullyPosition = new THREE.Vector3(0, 0, 0);
 
         let gullies = [
-            [n1, v1, v3, false],
-            [n1, v3, shapeForward, false],
-            [v3, n1, n2, shapeDirection],
-            [v3, n2, n1, !shapeDirection],
-            [n2, v3, v2, false],
-            [n2, shapeForward, v3, false]
+            [n1, v1, v3],
+            [v3, n1, n2],
+            [n2, v3, v2]
         ].map(function (_) {
 
-            let [gullyDirection, rightNeighborDirection, leftNeighborDirection, useExplementaryAngle] = _;
+            let [gullyDirection, rightNeighborDirection, leftNeighborDirection] = _;
 
             let rightNeighborToGully = rightNeighborDirection.clone()
                 .add(gullyDirection.clone().multiplyScalar(- Math.cos(gullyDirection.angleTo(rightNeighborDirection))))
@@ -249,7 +246,6 @@ Object.assign(VFold, {
                 .normalize();
 
             let gullyAngle = rightNeighborToGully.angleTo(leftNeighborToGully);
-            if (useExplementaryAngle) gullyAngle = 2 * Math.PI - gullyAngle;
 
             let gullyRight = gullyDirection.clone()
                 .cross(

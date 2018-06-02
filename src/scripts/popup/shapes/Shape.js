@@ -1,21 +1,36 @@
 
 import * as THREE from "three";
 
-export const GULLY_0                        = 0b0000;
-export const GULLY_0_SUPPLEMENTARY          = 0b0001;
-export const GULLY_0_OPPOSITE               = 0b1000;
-export const GULLY_0_SUPPLEMENTARY_OPPOSITE = 0b1001;
-export const GULLY_1                        = 0b0010;
-export const GULLY_1_SUPPLEMENTARY          = 0b1010;
-export const GULLY_1_OPPOSITE               = 0b0011;
-export const GULLY_1_SUPPLEMENTARY_OPPOSITE = 0b1011;
-export const GULLY_2                        = 0b0100;
-export const GULLY_2_SUPPLEMENTARY          = 0b0101;
-export const GULLY_2_OPPOSITE               = 0b1100;
-export const GULLY_2_SUPPLEMENTARY_OPPOSITE = 0b1101;
+export const GULLY_0                                        = 0b00000;
+export const GULLY_0_EXPLEMENTARY                           = 0b10000;
+export const GULLY_0_SUPPLEMENTARY                          = 0b00100;
+export const GULLY_0_SUPPLEMENTARY_EXPLEMENTARY             = 0b10100;
+export const GULLY_0_OPPOSITE                               = 0b01000;
+export const GULLY_0_OPPOSITE_EXPLEMENTARY                  = 0b11000;
+export const GULLY_0_SUPPLEMENTARY_OPPOSITE                 = 0b01100;
+export const GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY    = 0b11100;
 
-export const GULLY_SUPPLEMENTARY                   = 0b0001;
-export const GULLY_OPPOSITE                        = 0b1000;
+export const GULLY_1                                        = 0b00001;
+export const GULLY_1_EXPLEMENTARY                           = 0b10001;
+export const GULLY_1_SUPPLEMENTARY                          = 0b00101;
+export const GULLY_1_SUPPLEMENTARY_EXPLEMENTARY             = 0b10101;
+export const GULLY_1_OPPOSITE                               = 0b01001;
+export const GULLY_1_OPPOSITE_EXPLEMENTARY                  = 0b11001;
+export const GULLY_1_SUPPLEMENTARY_OPPOSITE                 = 0b01101;
+export const GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY    = 0b11101;
+
+export const GULLY_2                                        = 0b00010;
+export const GULLY_2_EXPLEMENTARY                           = 0b10010;
+export const GULLY_2_SUPPLEMENTARY                          = 0b00110;
+export const GULLY_2_SUPPLEMENTARY_EXPLEMENTARY             = 0b10110;
+export const GULLY_2_OPPOSITE                               = 0b01010;
+export const GULLY_2_OPPOSITE_EXPLEMENTARY                  = 0b11010;
+export const GULLY_2_SUPPLEMENTARY_OPPOSITE                 = 0b01110;
+export const GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY    = 0b11110;
+
+export const GULLY_SUPPLEMENTARY = 0b00100;
+export const GULLY_OPPOSITE      = 0b01000;
+export const GULLY_EXPLEMENTARY  = 0b10000;
 
 export function Shape() {
 
@@ -38,11 +53,9 @@ Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
         let gullyRotationMatrix = new THREE.Matrix4();
 
         function getGullyInterpolation(interpolation, i) {
-            let gullyInterpolations = interpolation.gullies;
-
-            if (i in gullyInterpolations) return gullyInterpolations[i];
-            else if ((i ^ GULLY_OPPOSITE) in gullyInterpolations) {
-                let interpol = gullyInterpolations[i ^ GULLY_OPPOSITE];
+            if (i in interpolation.gullies) return interpolation.gullies[i];
+            else if (i & GULLY_OPPOSITE) {
+                let interpol = getGullyInterpolation(interpolation, i ^ GULLY_OPPOSITE);
                 return {
                     gullyPosition: interpol.gullyPosition,
                     gullyRight: interpol.gullyRight.clone().negate(),
@@ -51,8 +64,8 @@ Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
                     gullyAngle: interpol.gullyAngle,
                     shapeOrigin: interpol.shapeOrigin
                 };
-            } else if ((i ^ GULLY_SUPPLEMENTARY) in gullyInterpolations) {
-                let interpol = gullyInterpolations[i ^ GULLY_SUPPLEMENTARY];
+            } else if (i & GULLY_SUPPLEMENTARY) {
+                let interpol = getGullyInterpolation(interpolation, i ^ GULLY_SUPPLEMENTARY);
                 return {
                     gullyPosition: interpol.gullyPosition,
                     gullyRight: interpol.gullyUp,
@@ -61,6 +74,16 @@ Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
                     gullyAngle: Math.PI - interpol.gullyAngle,
                     shapeOrigin: interpol.shapeOrigin
                 };
+            } else if (i & GULLY_EXPLEMENTARY) {
+                let interpol = getGullyInterpolation(interpolation, i ^ GULLY_EXPLEMENTARY);
+                return {
+                    gullyPosition: interpol.gullyPosition,
+                    gullyRight: interpol.gullyRight.clone().negate(),
+                    gullyDirection: interpol.gullyDirection,
+                    gullyUp: interpol.gullyUp.clone().negate(),
+                    gullyAngle: 2 * Math.PI - interpol.gullyAngle,
+                    shapeOrigin: interpol.shapeOrigin
+                }
             } else {
                 throw new Error("Unexpected case");
             }

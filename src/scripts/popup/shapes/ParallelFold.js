@@ -184,13 +184,13 @@ Object.assign(ParallelFold, {
                 p3,
                 p3p1.clone().normalize().add(p3p2.clone().normalize()).multiplyScalar(-0.5).normalize(),
                 p3p1.angleTo(p3p2),
-                true
+                false
             ],
             [
                 p3,
                 p3p1.clone().normalize().add(p3p2.clone().normalize()).multiplyScalar(0.5).normalize(),
                 p3p1.angleTo(p3p2),
-                false
+                true
             ],
             [
                 p2,
@@ -224,8 +224,8 @@ Object.assign(ParallelFold, {
 
         return {
             gullies: shapeDirection
-                ? gullies
-                : [gullies[1], gullies[0], gullies[3], gullies[2], gullies[5], gullies[4]],
+                ? [gullies[0], gullies[2], gullies[4]]
+                : [gullies[1], gullies[3], gullies[5]],
 
             // Debug use
             p1, p2, p3
