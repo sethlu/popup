@@ -28,6 +28,7 @@ export const GULLY_2_OPPOSITE_EXPLEMENTARY                  = 0b11010;
 export const GULLY_2_SUPPLEMENTARY_OPPOSITE                 = 0b01110;
 export const GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY    = 0b11110;
 
+export const GULLY_N_MASK        = 0b00011;
 export const GULLY_SUPPLEMENTARY = 0b00100;
 export const GULLY_OPPOSITE      = 0b01000;
 export const GULLY_EXPLEMENTARY  = 0b10000;
@@ -120,6 +121,22 @@ Shape.prototype = Object.assign(Object.create(THREE.Group.prototype), {
     }(),
 
     interpolate: function (angle) {
+
+    },
+
+    /**
+     * Callbacks on every nested gullies.
+     * @param callback
+     */
+    walkGullies: function (callback) {
+
+        Object.values(this.gullies).forEach(function (gully) {
+            callback(gully);
+
+            gully.shapes.forEach(function (shape) {
+                shape.walkGullies(callback);
+            })
+        })
 
     }
 

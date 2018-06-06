@@ -5,6 +5,7 @@ import {
     GULLY_0
 } from "./Shape";
 import {Gully} from "../Gully";
+import {ShapePlane} from "./ShapePlane";
 
 let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
@@ -23,9 +24,17 @@ function Base() {
 
     this.gullies = {};
     
-    this.gullies[GULLY_0] = new Gully();
+    this.gullies[GULLY_0] = new Gully(GULLY_0);
 
     this.add.apply(this, Object.values(this.gullies));
+
+    // Shape Planes
+
+    this.planes = {};
+
+    // Shape Controls
+
+    this.shapeControls = [];
 
     // Debug
 

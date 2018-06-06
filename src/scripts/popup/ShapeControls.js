@@ -3,8 +3,11 @@ import * as THREE from "three";
 import TWEEN from "@tweenjs/tween.js";
 import {BACKGROUND_OPACITY, ARROW_OPACITY} from "./ShapeControl";
 import {EPSILON} from "./consts";
+import {GULLY_EXPLEMENTARY, GULLY_SUPPLEMENTARY, GULLY_OPPOSITE} from './shapes/Shape';
+import {flattenArray} from "./util";
+import {Fold} from "./shapes/Fold";
 
-function ShapeControls(camera, domElement) {
+export function ShapeControls(camera, domElement) {
 
     this.camera = camera;
     this.domElement = domElement;
@@ -238,7 +241,7 @@ function ShapeControls(camera, domElement) {
                 rayCaster.setFromCamera(end, scope.camera);
                 let intersects = rayCaster.intersectObjects(
                     flattenArray(scope.shapes.map(function (shape) {
-                        return shape.planes.map(function (plane) { return plane.children; });
+                        return Object.values(shape.planes).map(function (plane) { return plane.children; });
                     })));
 
                 if (intersects.length > 0) {
@@ -246,13 +249,36 @@ function ShapeControls(camera, domElement) {
 
                     let intersect = intersects[0];
 
-                    scope.activeShape = intersect.object.parent.parent;
+                    let activeShape = intersect.object.parent.parent;
+
+                    // FIXME: Move this logic to elsewhere
+                    // Insert shape when active shape is clicked
+                    if (activeShape === scope.activeShape) {
+                        let gully = intersect.object.parent.getRayIntersectGully(rayCaster.ray, intersect, ~GULLY_EXPLEMENTARY);
+                        if (gully) {
+                            let fold = new Fold(
+                                0,
+                                1, 0,
+                                1, 0,
+                                1, 0,
+                                0);
+                            gully.addShape(fold);
+
+                            scope.shapes.push(fold);
+
+                            activeShape = fold;
+                        }
+                    }
+
+                    scope.activeShape = activeShape;
 
                 } else {
 
                     scope.activeShape = null;
 
                 }
+
+                console.log("ShapeControls: Active shape", scope.activeShape);
 
                 for (let shape of scope.shapes) {
                     for (let shapeControl of shape.shapeControls) {
@@ -376,13 +402,3 @@ ShapeControls.prototype = Object.assign(Object.create(THREE.EventDispatcher.prot
     }()
 
 });
-
-function flattenArray(a) {
-    if (!Array.isArray(a)) return [a];
-    return a.reduce(function (a, v) {
-        Array.prototype.push.apply(a, flattenArray(v));
-        return a;
-    }, []);
-}
-
-export {ShapeControls};

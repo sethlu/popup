@@ -27,6 +27,7 @@ import {
     GULLY_2_SUPPLEMENTARY_OPPOSITE,
     GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY
 } from "./Shape";
+import {SHAPE_PLANE_RIGHT, SHAPE_PLANE_LEFT} from './ShapePlane';
 import {Gully} from "../Gully";
 import {ParallelFold} from "./ParallelFold";
 import {VFold} from "./VFold";
@@ -57,40 +58,41 @@ function Fold(origin, a, b, c, d, e, f, g) {
 
     this.gullies = {};
 
-    this.gullies[GULLY_0] = new Gully();
-    this.gullies[GULLY_0_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_0_SUPPLEMENTARY] = new Gully();
-    this.gullies[GULLY_0_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_0_OPPOSITE] = new Gully();
-    this.gullies[GULLY_0_OPPOSITE_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE] = new Gully();
-    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_1] = new Gully();
-    this.gullies[GULLY_1_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_1_SUPPLEMENTARY] = new Gully();
-    this.gullies[GULLY_1_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_1_OPPOSITE] = new Gully();
-    this.gullies[GULLY_1_OPPOSITE_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE] = new Gully();
-    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_2] = new Gully();
-    this.gullies[GULLY_2_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_2_SUPPLEMENTARY] = new Gully();
-    this.gullies[GULLY_2_SUPPLEMENTARY_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_2_OPPOSITE] = new Gully();
-    this.gullies[GULLY_2_OPPOSITE_EXPLEMENTARY] = new Gully();
-    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE] = new Gully();
-    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully();
+    this.gullies[GULLY_0] = new Gully(GULLY_0);
+    this.gullies[GULLY_0_EXPLEMENTARY] = new Gully(GULLY_0_EXPLEMENTARY);
+    this.gullies[GULLY_0_SUPPLEMENTARY] = new Gully(GULLY_0_SUPPLEMENTARY);
+    this.gullies[GULLY_0_SUPPLEMENTARY_EXPLEMENTARY] = new Gully(GULLY_0_SUPPLEMENTARY_EXPLEMENTARY);
+    this.gullies[GULLY_0_OPPOSITE] = new Gully(GULLY_0_OPPOSITE);
+    this.gullies[GULLY_0_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_0_OPPOSITE_EXPLEMENTARY);
+    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE] = new Gully(GULLY_0_SUPPLEMENTARY_OPPOSITE);
+    this.gullies[GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_0_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY);
+    this.gullies[GULLY_1] = new Gully(GULLY_1);
+    this.gullies[GULLY_1_EXPLEMENTARY] = new Gully(GULLY_1_EXPLEMENTARY);
+    this.gullies[GULLY_1_SUPPLEMENTARY] = new Gully(GULLY_1_SUPPLEMENTARY);
+    this.gullies[GULLY_1_SUPPLEMENTARY_EXPLEMENTARY] = new Gully(GULLY_1_SUPPLEMENTARY_EXPLEMENTARY);
+    this.gullies[GULLY_1_OPPOSITE] = new Gully(GULLY_1_OPPOSITE);
+    this.gullies[GULLY_1_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_1_OPPOSITE_EXPLEMENTARY);
+    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE] = new Gully(GULLY_1_SUPPLEMENTARY_OPPOSITE);
+    this.gullies[GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_1_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY);
+    this.gullies[GULLY_2] = new Gully(GULLY_2);
+    this.gullies[GULLY_2_EXPLEMENTARY] = new Gully(GULLY_2_EXPLEMENTARY);
+    this.gullies[GULLY_2_SUPPLEMENTARY] = new Gully(GULLY_2_SUPPLEMENTARY);
+    this.gullies[GULLY_2_SUPPLEMENTARY_EXPLEMENTARY] = new Gully(GULLY_2_SUPPLEMENTARY_EXPLEMENTARY);
+    this.gullies[GULLY_2_OPPOSITE] = new Gully(GULLY_2_OPPOSITE);
+    this.gullies[GULLY_2_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_2_OPPOSITE_EXPLEMENTARY);
+    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE] = new Gully(GULLY_2_SUPPLEMENTARY_OPPOSITE);
+    this.gullies[GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY] = new Gully(GULLY_2_SUPPLEMENTARY_OPPOSITE_EXPLEMENTARY);
 
     this.add.apply(this, Object.values(this.gullies));
 
     // Shape planes
 
-    this.planes = [
-        new ShapePlane(),
-        new ShapePlane()
-    ];
-    this.add.apply(this, this.planes);
+    this.planes = {};
+
+    this.planes[SHAPE_PLANE_RIGHT] = new ShapePlane(SHAPE_PLANE_RIGHT);
+    this.planes[SHAPE_PLANE_LEFT] = new ShapePlane(SHAPE_PLANE_LEFT);
+
+    this.add.apply(this, Object.values(this.planes));
 
     // Controls
 
