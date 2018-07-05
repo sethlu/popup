@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import {EPSILON, VEC3_RIGHT as shapeRight, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts.js";
 import {
@@ -29,7 +28,7 @@ let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0x00cccc, shading:
  * @param c
  * @param d
  */
-function VFold(origin, a, b, c, d) {
+export function VFold(origin, a, b, c, d) {
 
     Shape.call(this);
 
@@ -277,5 +276,3 @@ Object.assign(VFold, {
     }
 
 });
-
-export {VFold};

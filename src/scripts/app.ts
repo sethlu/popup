@@ -86,7 +86,7 @@ window.addEventListener("load", function () {
     // Interactions
 
     let shapeControls = new ShapeControls(camera, renderer.domElement);
-    shapeControls.shapes = [fold, fold2];
+    shapeControls.shapes = [base, fold, fold2];
 
     (function () {
 

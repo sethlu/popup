@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import {Quaternion} from "three";
 import {Line3} from "./math/Line3";
@@ -19,7 +18,7 @@ import {SHAPE_PLANE_RIGHT, SHAPE_PLANE_LEFT} from './shapes/ShapePlane';
  * Origin and direction in angular coordinates
  * @constructor
  */
-function Gully(gullyType) {
+export function Gully(gullyType) {
 
     THREE.Group.call(this);
 
@@ -180,5 +179,3 @@ Gully.prototype = Object.assign(Object.create(THREE.Group.prototype), {
     }()
 
 });
-
-export {Gully};

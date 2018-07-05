@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import {
     Shape,
@@ -13,7 +12,7 @@ let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, shading:
  * The base for modeling
  * @constructor
  */
-function Base() {
+export function Base() {
 
     Shape.call(this);
 
@@ -124,5 +123,3 @@ Base.prototype = Object.assign(Object.create(Shape.prototype), {
     }
 
 });
-
-export {Base};

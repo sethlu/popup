@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 
 let textureLoader = new THREE.TextureLoader();
@@ -6,10 +5,10 @@ let textureLoader = new THREE.TextureLoader();
 let backgroundTexture = textureLoader.load("images/shapecontrol_blank.png");
 let arrowTexture = textureLoader.load("images/shapecontrol_line_arrows.png");
 
-const BACKGROUND_OPACITY = 0.8;
-const ARROW_OPACITY = 1;
+export const BACKGROUND_OPACITY = 0.8;
+export const ARROW_OPACITY = 1;
 
-function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 1, grid = true) {
+export function ShapeControl(ranges, func, referenceSpace = "shapeControl", movement = 1, grid = true) {
 
     THREE.Group.call(this);
 
@@ -160,5 +159,3 @@ ShapeControl.prototype = Object.assign(Object.create(THREE.Group.prototype), {
     }()
 
 });
-
-export {ShapeControl, BACKGROUND_OPACITY, ARROW_OPACITY};

@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 
 export const GULLY_0                                        = 0b00000;

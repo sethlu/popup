@@ -41,7 +41,7 @@ const transparentMaterial = new THREE.MeshBasicMaterial({transparent: true, opac
 
 // TODO: Warn suitable gullies to place additional shapes
 
-function Fold(origin, a, b, c, d, e, f, g) {
+export function Fold(origin, a, b, c, d, e, f, g) {
 
     Shape.call(this);
 
@@ -465,5 +465,3 @@ function solveWithNewtonRaphsonMethod(func, x = 0, epsilon = EPSILON, delta = EP
     }
     return x;
 }
-
-export {Fold};

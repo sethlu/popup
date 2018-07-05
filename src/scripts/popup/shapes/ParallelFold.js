@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 import {EPSILON, VEC3_FORWARD as shapeForward, VEC3_UP as shapeUp} from "../consts";
 import {
@@ -20,7 +19,7 @@ import {Gully} from "../Gully";
 
 let debugMeshMaterial = new THREE.MeshLambertMaterial({color: 0xcccc00, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
-function ParallelFold(origin, a, b, c, d) {
+export function ParallelFold(origin, a, b, c, d) {
 
     Shape.call(this);
 
@@ -238,5 +237,3 @@ Object.assign(ParallelFold, {
 function calcTriangleInnerAngle(a, b, c) {
     return Math.acos((Math.pow(a, 2) + Math.pow(b, 2) - Math.pow(c, 2)) / (2 * a * b));
 }
-
-export {ParallelFold};

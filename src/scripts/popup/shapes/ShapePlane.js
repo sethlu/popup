@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 
 export const SHAPE_PLANE_RIGHT = 0b0;
@@ -6,7 +5,7 @@ export const SHAPE_PLANE_LEFT  = 0b1;
 
 let debugPlaneMaterial = new THREE.MeshLambertMaterial({color: 0x00ffff, shading: THREE.SmoothShading, side: THREE.DoubleSide});
 
-function ShapePlane(shapePlaneType) {
+export function ShapePlane(shapePlaneType) {
 
     THREE.Group.call(this);
 
@@ -71,5 +70,3 @@ ShapePlane.prototype = Object.assign(Object.create(THREE.Group.prototype), {
     }
 
 });
-
-export {ShapePlane};

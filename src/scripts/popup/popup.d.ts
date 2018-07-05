@@ -1,4 +1,3 @@
-
 import * as THREE from "three";
 
 export class Gully extends THREE.Group {
